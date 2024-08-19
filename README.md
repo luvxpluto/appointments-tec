@@ -44,10 +44,10 @@ Este repositorio contiene el código fuente y la documentación para el proyecto
 
 ### Mantenimiento de Datos
 
-- **Cursos**: Gestión del código y nombre de cada curso.
-- **Profesores**: Manejo de la información de los profesores, incluyendo el nombre, los cursos que atienden, sus horarios de consulta, y la capacidad para citas.
-- **Estudiantes**: Registro de los estudiantes, incluyendo su nombre, carnet, cursos actuales, las veces que han llevado un curso, y la cantidad de estrellas asignadas por el profesor.
-- **Semestre**: Registro de la fecha de finalización del semestre actual.
+- **Cursos**: Gestión del código y nombre de cada curso. CRUD
+- **Profesores**: Manejo de la información de los profesores, incluyendo el nombre, los cursos que atienden, sus horarios de consulta, y la capacidad para citas.CRUD
+- **Estudiantes**: Registro de los estudiantes, incluyendo su nombre, carnet, cursos actuales, las veces que han llevado un curso, y la cantidad de estrellas asignadas por el profesor. CRUD
+- **Semestre**: Registro de la fecha de finalización del semestre actual. CRUD
 
 ### Asignación de Citas de Consulta
 
