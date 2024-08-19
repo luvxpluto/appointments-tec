@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Nombre del proyecto: Appointments-tec
 
-## Getting Started
+Este repositorio contiene el código fuente y la documentación para el proyecto programado de la **Licenciatura en Administración de Tecnología de Información** del **Tecnológico de Costa Rica (TEC)**. El objetivo del proyecto es desarrollar un sistema que permita la gestión de horarios de consulta de los profesores y la asignación de citas para los estudiantes.
 
-First, run the development server:
+## Resumen Funcionalidades Principales
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Mantenimiento de Datos**: Gestión de información relacionada con cursos, profesores, estudiantes y semestres.
+- **Asignación de Citas de Consulta**: Permite a los estudiantes solicitar citas con los profesores de sus cursos.
+- **Generación de Reportes**: Consultas personalizadas sobre citas, cursos, profesores y estudiantes.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Reglas
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Control de Versiones
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- **Commits:**
+  - Realizar commits frecuentes con mensajes claros y descriptivos para documentar los cambios realizados en el código.
+  - Asegúrate de que cada commit refleje un cambio coherente y no trabajar sobre lo que estan haciendo otras personas.
 
-## Learn More
+- **Branches:**
+  - Utiliza ramas (branches) para desarrollar nuevas características o realizar correcciones de errores.
+  - Antes de fusionar una rama con la rama principal (`main` o `master`), asegúrate de que la funcionalidad esté completamente implementada y probada. 
 
-To learn more about Next.js, take a look at the following resources:
+### Documentación
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Documentación Interna:**
+  - Asegúrate de que el código esté bien comentado para facilitar su comprensión y mantenimiento.
+  - Los comentarios deben explicar el propósito de las funciones y los bloques de código complejos.
+  - Mantén la documentación interna actualizada a medida que el código evoluciona.
+    
+### Division de trabajo actualizada
+- **Fabian**
+  -0.
+- **Esteban**
+  -0.
+- **David**
+  -0.
+- **Fer**
+  -0.
+- **Sebas**
+  -0.
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Checklist de las Funcionalidades Principales del Sistema
 
-## Deploy on Vercel
+### Mantenimiento de Datos
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Cursos**: Gestión del código y nombre de cada curso. CRUD
+- **Profesores**: Manejo de la información de los profesores, incluyendo el nombre, los cursos que atienden, sus horarios de consulta, y la capacidad para citas.CRUD
+- **Estudiantes**: Registro de los estudiantes, incluyendo su nombre, carnet, cursos actuales, las veces que han llevado un curso, y la cantidad de estrellas asignadas por el profesor. CRUD
+- **Semestre**: Registro de la fecha de finalización del semestre actual. CRUD
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+### Asignación de Citas de Consulta
+
+- El sistema muestra las opciones de citas disponibles basadas en la cantidad de veces que el estudiante ha llevado el curso y su puntuación de estrellas.
+- Las citas se asignan de lunes a viernes, priorizando las opciones según la disponibilidad y criterios previamente establecidos.
+
+### Reportes
+
+- Permite consultar información sobre cursos, profesores, estudiantes, y citas asignadas utilizando filtros específicos.
+- Los reportes se generan en un formato amigable para el usuario, simulando consultas en Prolog pero presentadas a través de una interfaz gráfica intuitiva.
+
+## Criterios de Evaluación
+
+El proyecto será evaluado de acuerdo con los siguientes criterios:
+
+- **Documentación Externa**: 15% de la nota total.
+- **Funcionalidad de Mantenimiento de Datos**: 20% de la nota total.
+- **Funcionalidad de Asignación de Citas**: 23% de la nota total.
+- **Funcionalidad de Reportes**: 22% de la nota total.
+- **Interconexión Prolog-Lenguaje de Programación**: 20% de la nota total.
+- **Persistencia de Datos**: 7% adicional si se implementa correctamente.
+
