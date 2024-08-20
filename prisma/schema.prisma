@@ -19,7 +19,6 @@ model Course {
   id_course String @id
   name      String
   professors ProfessorCourse[]
-  students StudentCourse[]
 }
 
 model Professor {
@@ -36,6 +35,7 @@ model ProfessorCourse{
   course              Course @relation(fields: [id_course], references: [id_course])
   id_course           String
   appointments AppointmentSchedule[]
+  students StudentCourse[]
   
   @@unique([id_professor, id_course])
 }
@@ -44,12 +44,12 @@ model StudentCourse {
   id_student_course Int @id @default(autoincrement())
   student           Student @relation(fields: [id_student], references: [id_student])
   id_student        String
-  course            Course @relation(fields: [id_course], references: [id_course])
-  id_course         String
+  professor_course  ProfessorCourse @relation(fields: [id_professor_course], references: [id_professor_course])
+  id_professor_course         Int 
   enrollment_count  Int
   stars_rating      Int
 
-  @@unique([id_student, id_course])
+  @@unique([id_student, id_professor_course])
 }
 
 model AppointmentSchedule {

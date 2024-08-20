@@ -2,6 +2,7 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import exp from 'constants';
 
 export async function POST(request) {
   try {
@@ -32,4 +33,17 @@ export async function POST(request) {
       { status: 500 }
     );
   }
-} 
+}
+
+export async function GET(request) {
+    try {
+        const courses = await prisma.course.findMany();
+        return NextResponse.json(courses, { status: 200 });
+    } catch (error) {
+        console.error('Error getting the courses:', error);
+        return NextResponse.json(
+        { error: 'Error getting the courses' },
+        { status: 500 }
+        );
+    }
+}
