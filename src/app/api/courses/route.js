@@ -1,15 +1,12 @@
-// src/app/api/courses/route.js
-
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import exp from 'constants';
 
 export async function POST(request) {
   try {
     const body = await request.json();
     const { id_course, name } = body;
 
-    // Basic validations
+    // Basic validations - Check if the course ID and name are provided
     if (!id_course || !name) {
       return NextResponse.json(
         { error: 'Course ID and name are required' },
