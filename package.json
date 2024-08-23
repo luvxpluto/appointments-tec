@@ -19,8 +19,16 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.20",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.10",
     "typescript": "^5"
-  }
+  },
+  "description": "Este repositorio contiene el código fuente y la documentación para el proyecto programado de la **Licenciatura en Administración de Tecnología de Información** del **Tecnológico de Costa Rica (TEC)**. El objetivo del proyecto es desarrollar un sistema que permita la gestión de horarios de consulta de los profesores y la asignación de citas para los estudiantes.",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
