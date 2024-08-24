@@ -31,9 +31,9 @@ Este repositorio contiene el código fuente y la documentación para el proyecto
 - **Fabian**
   -0.
 - **Esteban**
-  -0.
+  -Back-end
 - **David**
-  -0.
+  -Front-end
 - **Fer**
   -0.
 - **Sebas**
