@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 function validateCreateCourse(body) {
-  if(!body || !body.id_course.trim() === "" || !body.name.trim() === "") {
+  if(!body || !body.id_course || !body.id_course.trim() === "" || !body.name || !body.name.trim() === "") {
     return {valid: false, error: "Course ID and name are required"};
   }
   return {valid: true};
