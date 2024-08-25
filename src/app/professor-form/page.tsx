@@ -28,24 +28,22 @@ import {
 
 import { toast } from '@/components/ui/use-toast';
 
-
-const courseSchema = z.object({
-    name: z.string().min(5, { message: 'El nombre debe tener al menos 5 caracteres' }),
-    id_course: z.string().min(1,{ message: 'El ID del curso es obligatorio' }),
+// Esquema modificado para aceptar el id como string y luego transformarlo a número
+const professorSchema = z.object({
+    name: z.string().min(2, { message: 'El nombre debe tener al menos 2 caracteres' }),
 });
 
-export function CourseForm(){
-    const form = useForm<z.infer<typeof courseSchema>>({
-        resolver: zodResolver(courseSchema),
+export function StudentForm(){
+    const form = useForm<z.infer<typeof professorSchema>>({
+        resolver: zodResolver(professorSchema),
         defaultValues: {
             name: '',
-            id_course: '',
         },
     });
 
     const onSubmit = async (data: any) => {
         try {
-            const response = await fetch('/api/courses', {
+            const response = await fetch('/api/professors', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -56,20 +54,20 @@ export function CourseForm(){
             if (response.ok) {
                 const result = await response.json();
                 toast({
-                    title: "Curso Registrado",
-                    description: `El curso ${result.id_course} ${result.name} ha sido registrado exitosamente.`,
+                    title: "Profesor Registrado",
+                    description: `El profesor ${result.name} ha sido registrado exitosamente.`,
                 });
             } else {
                 const errorData = await response.json();
                 toast({
                     title: "Error",
-                    description: `Error al registrar el curso: ${errorData.error}`,
+                    description: `Error al registrar el profesor: ${errorData.error}`,
                 });
             }
         } catch (error) {
             toast({
                 title: "Error",
-                description: "Hubo un problema al registrar el curso.",
+                description: "Hubo un problema al registrar el profesor.",
             });
             console.error("Error al enviar los datos:", error);
         }
@@ -78,8 +76,8 @@ export function CourseForm(){
     return (
         <Card className="w-[350px]">
             <CardHeader>
-                <CardTitle>Registrar cursos</CardTitle>
-                <CardDescription>Ingresa los detalles del curso</CardDescription>
+                <CardTitle>Registrar profesor</CardTitle>
+                <CardDescription>Ingresa los detalles del profesor</CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -87,25 +85,12 @@ export function CourseForm(){
                         <div className="grid w-full items-center gap-5">
                             <FormField
                                 control={form.control}
-                                name="id_course"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel htmlFor="id_course">Código del curso</FormLabel>
-                                        <FormControl>
-                                            <Input id="id_course" placeholder="TI3603" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel htmlFor="name">Nombre</FormLabel>
                                         <FormControl>
-                                            <Input id="name" placeholder="Calidad en sistemas de información" {...field} />
+                                            <Input id="name" placeholder="David Jiménez" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -122,4 +107,4 @@ export function CourseForm(){
     );
 }
 
-export default CourseForm;
+export default StudentForm;

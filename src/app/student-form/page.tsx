@@ -47,7 +47,6 @@ export function StudentForm(){
         resolver: zodResolver(studentSchema),
         defaultValues: {
             name: '',
-            id_student: 0,
         },
     });
 

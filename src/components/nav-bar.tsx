@@ -14,7 +14,6 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { ModeToggle } from "@/components/theme-toggle"
-import { Separator } from "@/components/ui/separator"
 
 const componentsStudent: { title: string; href: string; description: string }[] = [
   {
@@ -34,7 +33,7 @@ const componentsStudent: { title: string; href: string; description: string }[] 
 const componentsProfessor: { title: string; href: string; description: string }[] = [
     {
       title: "Registrar profesor",
-      href: "",
+      href: "/professor-form",
       description:
         "Formulario para registrar un profesor en el sistema.",
     },
