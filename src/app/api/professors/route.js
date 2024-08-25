@@ -1,27 +1,42 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+function validateCreateProfessor(body) {
+    if (!body || !body.name || body.name.trim() === "") {
+        return { valid: false, error: "Professor name is required" };
+    }
+    return { valid: true };
+}
+
 //POST method to create a professor
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { name } = body;
 
-        // Basic validations - Check if the professor name is provided
-        if (!name) {
-            return NextResponse.json(
-                { error: "Professor name is required" },
-                { status: 400 }
-            );
+        // Validate the request body
+        const validation = validateCreateProfessor(body);
+        if (!validation.valid) {
+            return NextResponse.json({ error: validation.error }, { status: 400 });
         }
 
-        const newProfessor = await prisma.professor.create({
-            data: {
-                name,
+        // Check if the professor already exists
+        const existingProfessor = await prisma.professor.findMany({
+            where: {
+                name: body.name.trim(),
             },
         });
-        return NextResponse.json(newProfessor, { status: 201 });
+        if (existingProfessor.length > 0) {  // Cambié esto a existingProfessor.length > 0
+            return NextResponse.json({ error: "Professor already exists" }, { status: 409 });
+        }
 
+        // Create the professor in the database
+        const newProfessor = await prisma.professor.create({
+            data: {
+                name: body.name.trim(),
+            },
+        });
+
+        return NextResponse.json(newProfessor, { status: 201 });
     } catch (error) {
         console.error("Error creating the professor:", error);
         return NextResponse.json(
@@ -30,7 +45,6 @@ export async function POST(request) {
         );
     }
 }
-
 
 //GET method to get all professors
 export async function GET(request) {
