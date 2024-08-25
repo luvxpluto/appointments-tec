@@ -19,7 +19,7 @@ import { Separator } from "@/components/ui/separator"
 const componentsStudent: { title: string; href: string; description: string }[] = [
   {
     title: "Registrar estudiante",
-    href: "",
+    href: "/student-form",
     description:
       "Para que un estudiante pueda ser registrado en el sistema, se debe de llenar el formulario sus datos.",
   },
@@ -52,6 +52,21 @@ const componentsProfessor: { title: string; href: string; description: string }[
     },
 ]
 
+const componentsCourses: { title: string; href: string; description: string }[] = [
+    {
+      title: "Registrar curso",
+      href: "/course-form",
+      description:
+        "Formulario para registrar un curso en el sistema.",
+    },
+    {
+      title: "Soliciar cita",
+      href: "",
+      description:
+        "Soliciar cita con un profesor.",
+    },
+]
+
 
 export function NavBar() {
   return (
@@ -59,7 +74,7 @@ export function NavBar() {
     <NavigationMenu>
       <NavigationMenuList>
       <NavigationMenuItem>
-          <Link href="" legacyBehavior passHref>
+          <Link href="\" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               Inicio
             </NavigationMenuLink>
@@ -97,8 +112,22 @@ export function NavBar() {
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
-        
-        
+        <NavigationMenuItem>
+          <NavigationMenuTrigger>Cursos</NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <ul className="w-[600px] gap-3 p-4 md:w-[500px] lg:w-[400px]">
+              {componentsCourses.map((component) => (
+                <ListItem
+                  key={component.title}
+                  title={component.title}
+                  href={component.href}
+                >
+                  {component.description}
+                </ListItem>
+              ))}
+            </ul>
+          </NavigationMenuContent>
+        </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
     <ModeToggle />
