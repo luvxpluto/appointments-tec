@@ -4,6 +4,7 @@ import { Inter as FontSans } from "next/font/google";
 import { NavBar } from "@/components/nav-bar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Separator } from "@/components/ui/separator";
+import { Toaster } from "@/components/ui/toaster";
 
 import { cn } from "@/lib/utils"
 
@@ -42,8 +43,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
           </nav>
           <div className="pt-14">
             <Separator className="fixed"/>
-            {children}
           </div>
+          <main className="flex justify-center pt-10">{children}</main> 
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
