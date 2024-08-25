@@ -51,11 +51,36 @@ export function StudentForm(){
         },
     });
 
-    const onSubmit = (data: any) => {
-        toast({
-            title: "Estudiante registrado",
-            description: "El estudiante: " + data.id_student + " ha sido registrado exitosamente",
-        });
+    const onSubmit = async (data: any) => {
+        try {
+            const response = await fetch('/api/students', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                toast({
+                    title: "Estudiante Registrado",
+                    description: `El estudiante ${result.name} ha sido registrado exitosamente.`,
+                });
+            } else {
+                const errorData = await response.json();
+                toast({
+                    title: "Error",
+                    description: `Error al registrar el estudiante: ${errorData.error}`,
+                });
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Hubo un problema al registrar el estudiante.",
+            });
+            console.error("Error al enviar los datos:", error);
+        }
     };
 
     return (
