@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 function validateCreateProfessor(body) {
-    if (!body || !body.name || body.name.trim() === "") {
-        return { valid: false, error: "Professor name is required" };
+    if (!body || !body.name || body.name.trim() === "" || !body.id_professor || body.id_professor.toString().trim() === "") {
+        return { valid: false, error: "Professor id and name are required" };
     }
     return { valid: true };
 }
@@ -20,18 +20,19 @@ export async function POST(request) {
         }
 
         // Check if the professor already exists
-        const existingProfessor = await prisma.professor.findMany({
+        const existingProfessor = await prisma.professor.findUnique({
             where: {
-                name: body.name.trim(),
+                id_professor: body.id_professor.toString().trim(),
             },
         });
-        if (existingProfessor.length > 0) {  // Cambié esto a existingProfessor.length > 0
+        if (existingProfessor) {
             return NextResponse.json({ error: "Professor already exists" }, { status: 409 });
         }
 
         // Create the professor in the database
         const newProfessor = await prisma.professor.create({
             data: {
+                id_professor: body.id_professor.toString().trim(),
                 name: body.name.trim(),
             },
         });
