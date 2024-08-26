@@ -24,6 +24,7 @@ export async function POST(request) {
         id_student: body.id_student.toString().trim(),
       }
     });
+    
     if(existingStudent) {
       return NextResponse.json({error: "Student already exists"}, {status: 409});
     }
