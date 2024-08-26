@@ -29,15 +29,15 @@ Este repositorio contiene el código fuente y la documentación para el proyecto
     
 ### Division de trabajo actualizada
 - **Fabian**
-  -0.
+  -Back-end Estudiante - Curso
 - **Esteban**
-  -Back-end
+  -Back-end Profesor - Curso
 - **David**
-  -Front-end
+  -Front-end Landing, Rating de estudiante
 - **Fer**
-  -0.
+  -Front end - validacion
 - **Sebas**
-  -0.
+  - Back-end Algoritmo de las citas
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## Checklist de las Funcionalidades Principales del Sistema
