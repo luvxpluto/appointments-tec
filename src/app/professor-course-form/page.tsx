@@ -48,12 +48,12 @@ const fetchCourses = async () => {
     try {
         const response = await fetch('/api/courses'); 
         if (!response.ok) {
-            throw new Error('Error fetching courses');
+            throw new Error('Error al obtener los cursos');
         }
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error('Error fetching courses:', error);
+        console.error('Error al obtener los cursos:', error);
         return [];
     }
 };
@@ -62,12 +62,12 @@ const fetchProfessors = async () => {
     try {
         const response = await fetch('/api/professors'); 
         if (!response.ok) {
-            throw new Error('Error fetching professors');
+            throw new Error('Error al obtener los profesores');
         }
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error('Error fetching professors:', error);
+        console.error('Error al obtener los profesores:', error);
         return [];
     }
 }
@@ -115,14 +115,14 @@ export function CourseProfForm(){
             if (response.ok) {
                 const result = await response.json();
                 toast({
-                    title: "Success",
-                    description: `El curso ha sido asignado exitosamente.`,
+                    title: "Curso asignado",
+                    description: `El curso ${data.id_course} ha sido asignado exitosamente.`,
                 });
             } else {
                 const errorData = await response.json();
                 toast({
                     title: "Error",
-                    description: `Error al asignar el curso: ${errorData.error}`,
+                    description: `${errorData.error}`,
                 });
             }
         } catch (error) {

@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 
 function validateAsignCourse(body) {
     if (!body || !body.id_course || body.id_course.trim() === "" || !body.id_professor || body.id_professor.trim() === "") {
-        return { valid: false, error: "Course ID and Professor ID are required" };
+        return { valid: false, error: "El id del curso y el profesor son requeridos" };
     }
     return { valid: true };
 }
@@ -26,7 +26,7 @@ export async function POST(request) {
             }
         });
         if (!existingCourse) {
-            return NextResponse.json({ error: "Course does not exist" }, { status: 404 });
+            return NextResponse.json({ error: "No existe el curso" }, { status: 404 });
         }
 
         // Check if the professor already exists
@@ -36,7 +36,19 @@ export async function POST(request) {
             }
         });
         if (!existingProfessor) {
-            return NextResponse.json({ error: "Professor does not exist" }, { status: 404 });
+            return NextResponse.json({ error: "No existe el profesor" }, { status: 404 });
+        }
+
+        const existingCourseProfesor = await prisma.professorCourse.findUnique({
+            where:{
+                id_professor_id_course: {
+                    id_course: body.id_course.trim(),
+                    id_professor: body.id_professor.trim(),
+                }
+            }
+        })
+        if(existingCourseProfesor){
+            return NextResponse.json({ error: "El curso ya esta asignado al profesor" }, { status: 409 });
         }
 
         // Assign the course to the professor
@@ -50,9 +62,9 @@ export async function POST(request) {
         return NextResponse.json(newProfessorCourse, { status: 201 });
 
     } catch (error) {
-        console.error("Error assigning the course to the professor:", error);
+        console.error("Error al asignarle el curso al profesor:", error);
         return NextResponse.json(
-            { error: "Error assigning the course to the professor" },
+            { error: "Error al asignarle el curso al profesor:" },
             { status: 500 }
         );
     }
@@ -78,9 +90,9 @@ export async function GET(request) {
 
         return NextResponse.json(result, { status: 200 });
     } catch (error) {
-        console.error("Error getting the courses assigned to professors:", error);
+        console.error("Error obteniendo los cursos asignados al profesor", error);
         return NextResponse.json(
-            { error: "Error getting the courses assigned to professors" },
+            { error: "Error obteniendo los cursos asignados al profesor" },
             { status: 500 }
         );
     }

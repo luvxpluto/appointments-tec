@@ -70,7 +70,7 @@ export function StudentForm(){
                 const errorData = await response.json();
                 toast({
                     title: "Error",
-                    description: `Error al registrar el estudiante: ${errorData.error}`,
+                    description: `${errorData.error}`,
                 });
             }
         } catch (error) {

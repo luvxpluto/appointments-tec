@@ -56,14 +56,14 @@ export function CourseForm(){
             if (response.ok) {
                 const result = await response.json();
                 toast({
-                    title: "Curso Registrado",
+                    title: "Curso registrado",
                     description: `El curso ${result.id_course} ${result.name} ha sido registrado exitosamente.`,
                 });
             } else {
                 const errorData = await response.json();
                 toast({
                     title: "Error",
-                    description: `Error al registrar el curso: ${errorData.error}`,
+                    description: `${errorData.error}`,
                 });
             }
         } catch (error) {
