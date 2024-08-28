@@ -63,7 +63,7 @@ export function ProfessorForm(){
             if (response.ok) {
                 const result = await response.json();
                 toast({
-                    title: "Profesor Registrado",
+                    title: "Profesor registrado",
                     description: `El profesor ${result.name} ha sido registrado exitosamente.`,
                 });
             } else {
