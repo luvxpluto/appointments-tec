@@ -39,7 +39,7 @@ const componentsProfessor: { title: string; href: string; description: string }[
     },
     {
       title: "Registrar los cursos que imparte el profesor",
-      href: "",
+      href: "/professor-course-form",
       description:
         "Se debe registrar los cursos que imparte el profesor para que pueda solicitar una cita.",
     },
