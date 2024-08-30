@@ -1,8 +1,33 @@
+"use client"; // Necesario para los componentes cliente
+
 import Image from "next/image";
 import styles from "./page.module.css";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Función para verificar si la clase `dark` está en el elemento HTML
+    const checkDarkMode = () => {
+      const isDark = document.documentElement.classList.contains("dark");
+      setIsDarkMode(isDark);
+    };
+
+    // Ejecutar la verificación inicial
+    checkDarkMode();
+
+    // Escuchar cambios en el modo oscuro
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <main className={`${styles.main} relative flex flex-col items-center justify-center min-h-screen w-full h-full overflow-hidden px-4`}>
       {/* Fondo difuminado */}
@@ -45,7 +70,7 @@ export default function Home() {
         {/* Primera tarjeta de imagen e información */}
         <div className="flex flex-col items-center p-4 bg-white dark:bg-black rounded-lg max-w-xs">
           <Image
-            src="/Calendar-light.svg"
+            src={isDarkMode ? "/Calendar-dark.svg" : "/Calendar-light.svg"}
             alt="Calendar"
             width={180}
             height={37}
@@ -57,8 +82,8 @@ export default function Home() {
         {/* Segunda tarjeta de imagen e información */}
         <div className="flex flex-col items-center p-4 bg-white dark:bg-black rounded-lg max-w-xs">
           <Image
-            src="/magnifyingglass-light.svg"
-            alt="Learn Next.js"
+            src={isDarkMode ? "/magnifyingglass-dark.svg" : "/magnifyingglass-light.svg"}
+            alt="Magnifying Glass"
             width={180}
             height={37}
             priority
@@ -69,8 +94,8 @@ export default function Home() {
         {/* Tercera tarjeta de imagen e información */}
         <div className="flex flex-col items-center p-4 bg-white dark:bg-black rounded-lg max-w-xs">
           <Image
-            src="/stars-light.svg"
-            alt="Deploy with Vercel"
+            src={isDarkMode ? "/stars-dark.svg" : "/stars-light.svg"}
+            alt="Stars"
             width={180}
             height={37}
             priority
