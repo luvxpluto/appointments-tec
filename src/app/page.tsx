@@ -52,7 +52,7 @@ export default function Home() {
 
         {/* Imagen a la derecha del texto */}
         <div className="flex justify-center lg:justify-end w-full lg:w-1/2">
-          <div className="px-3 py-10 bg-white dark:bg-gradient-to-r dark:from-blue-400 dark:via-white-900 dark:to-red-300 rounded-lg">
+          <div className="px-3 py-10 bg-white dark:bg-gradient-to-r dark:from-blue-200 dark:via-white-900 dark:to-red-300 rounded-lg">
             <Image
               className={styles.logo}
               src="/Firma_TEC.svg"
@@ -66,33 +66,33 @@ export default function Home() {
       </div>
 
       {/* Sección de tarjetas */}
-      <div className="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 lg:mt-20">
+      <div className="relative grid grid-cols-1 md:grid-cols-3 gap-4 mt-30 lg:mt-20">
         {/* Primera tarjeta de imagen e información */}
-        <div className="flex flex-col items-center p-4 bg-white dark:bg-black rounded-lg max-w-xs">
+        <div className="flex flex-col items-center p-4 bg-white dark:bg-black rounded-lg mt-6 max-w-xs">
           <Image
             src={isDarkMode ? "/Calendar-dark.svg" : "/Calendar-light.svg"}
             alt="Calendar"
-            width={180}
+            width={150}
             height={37}
             priority
           />
-          <p className="mt-2 text-center text-black dark:text-white">Mediante el algoritmo de esta página, puede agendar citas en cualquier curso que esté cursando en el semestre o trimestre.</p>
+          <p className="mt-4 text-center text-black dark:text-white">Mediante el algoritmo de esta página, puede agendar citas en cualquier curso en el que esté matriculado en el semestre o trimestre.</p>
         </div>
 
         {/* Segunda tarjeta de imagen e información */}
-        <div className="flex flex-col items-center p-4 bg-white dark:bg-black rounded-lg max-w-xs">
+        <div className="flex flex-col items-center p-4 bg-white dark:bg-black rounded-lg mt-10 max-w-xs">
           <Image
             src={isDarkMode ? "/magnifyingglass-dark.svg" : "/magnifyingglass-light.svg"}
             alt="Magnifying Glass"
-            width={180}
+            width={120}
             height={37}
             priority
           />
-          <p className="mt-2 text-center text-black dark:text-white">Puede buscar a cualquier profesor disponible que esté dando el mismo curso para agendar su cita.</p>
+          <p className="mt-8 text-center text-black dark:text-white">Puede solicitar su cita con cualquier profesor disponible que esté impartiendo el curso matriculado y seleccionado.</p>
         </div>
 
         {/* Tercera tarjeta de imagen e información */}
-        <div className="flex flex-col items-center p-4 bg-white dark:bg-black rounded-lg max-w-xs">
+        <div className="flex flex-col items-center p-4 bg-white dark:bg-black rounded-lg mt-2 max-w-xs">
           <Image
             src={isDarkMode ? "/stars-dark.svg" : "/stars-light.svg"}
             alt="Stars"
@@ -100,7 +100,7 @@ export default function Home() {
             height={37}
             priority
           />
-          <p className="mt-2 text-center text-black dark:text-white">Cada estudiante tendrá una calificación que le ayudará a tener una mayor prioridad para que el algoritmo agende su cita lo más pronto posible.</p>
+          <p className=" text-center text-black dark:text-white">Cada estudiante tendrá una calificación que le ayudará a obtener una mayor prioridad en el algoritmo que sugiere su cita lo más pronto posible.</p>
         </div>
       </div>
     </main>
