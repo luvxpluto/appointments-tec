@@ -45,7 +45,7 @@ const componentsProfessor: { title: string; href: string; description: string }[
     },
     {
       title: "Cambiar rating de un estudiante",
-      href: "",
+      href: "/professor-calification",
       description:
         "Elija un estudiante para calificar su participación en la cita.",
     },
