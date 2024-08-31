@@ -61,6 +61,8 @@ model AppointmentSchedule {
   number_appointments     Int
   duration_appointment    Int // in minutes
   day_of_week             String
+  Semester                Semester @relation(fields: [id_semester], references: [id_semester])
+  id_semester             Int
   appointments            Appointment[]
 
   @@unique([id_professor_course, day_of_week])
@@ -74,13 +76,11 @@ model Appointment {
   student             Student? @relation(fields: [id_student], references: [id_student])
   id_student          String?
   is_reserved         Boolean
-  semester            Semester @relation(fields: [id_semester], references: [id_semester])
-  id_semester         Int
 }
 
 model Semester{
   id_semester Int @id @default(autoincrement())
   start_date  DateTime
   end_date    DateTime
-  appointments Appointment[]
+  appointments AppointmentSchedule[]
 }
