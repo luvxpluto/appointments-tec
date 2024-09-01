@@ -88,7 +88,7 @@ export async function POST(request) {
 }
 
 //Get semester of current date
-export async function GET(request) {
+export async function GET() {
     try {
         const semester = await getCurrentSemester();
         return NextResponse.json(semester, { status: 200 });

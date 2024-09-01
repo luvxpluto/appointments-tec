@@ -58,7 +58,7 @@ async function getProfessors() {
 }
 
 //GET method to get all professors
-export async function GET(request) {
+export async function GET() {
     try {
         const professors = await getProfessors();
         return NextResponse.json(professors, { status: 200 });

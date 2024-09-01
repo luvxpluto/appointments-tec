@@ -48,7 +48,7 @@ export async function POST(request) {
   }
 }
 
-export async function GET(request) {
+export async function GET() {
     try {
         const students = await prisma.student.findMany();
         return NextResponse.json(students, { status: 200 });
