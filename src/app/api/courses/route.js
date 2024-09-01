@@ -8,10 +8,28 @@ function validateCreateCourse(body) {
   return {valid: true};
 }
 
+export async function getCourse(body) {
+  const existingCourse = await prisma.course.findFirst({
+    where: {
+      id_course: body.id_course.trim(),
+    },
+  });
+  return existingCourse;
+}
+
+async function createCourse(body) {
+  const newCourse = await prisma.course.create({
+    data: {
+      id_course: body.id_course.trim(),
+      name: body.name.trim(),
+    },
+  });
+  return newCourse;
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
-    
     // Validate the request body
     const validation = validateCreateCourse(body);
     if(!validation.valid) {
@@ -19,23 +37,13 @@ export async function POST(request) {
     }
 
     // Check if the course already exists
-    const existingCourse = await prisma.course.findUnique({
-      where: {
-        id_course: body.id_course.trim(),
-      }
-    });
+    const existingCourse = await getCourse(body);
     if(existingCourse) {
       return NextResponse.json({error: "El curso ya existe"}, {status: 409});
     }
 
     // Create the course in the database
-    const newCourse = await prisma.course.create({
-      data: {
-        id_course: body.id_course.trim(),
-        name: body.name.trim(),
-      },
-    });
-
+    const newCourse = await createCourse(body);
     return NextResponse.json(newCourse, { status: 201 });
   
   } catch (error) {
@@ -47,15 +55,16 @@ export async function POST(request) {
   }
 }
 
-export async function GET(request) {
+async function getCourses() {
+  const courses = await prisma.course.findMany();
+  return courses;
+}
+
+export async function GET() {
     try {
-        const courses = await prisma.course.findMany();
+        const courses = await getCourses();
         return NextResponse.json(courses, { status: 200 });
     } catch (error) {
-        console.error('Error al obtener los cursos:', error);
-        return NextResponse.json(
-        { error: 'Error al obtener los cursos' },
-        { status: 500 }
-        );
+        return NextResponse.json({ error: 'Error al obtener los cursos' },{ status: 500 });
     }
 }
