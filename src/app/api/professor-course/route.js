@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getProfessor } from "@/app/api/professors/route";
+import { getCourse } from "@/app/api/courses/route";
 
 function validateAsignCourse(body) {
     if (!body || !body.id_course || body.id_course.trim() === "" || !body.id_professor || body.id_professor.trim() === "") {
@@ -8,6 +10,25 @@ function validateAsignCourse(body) {
     return { valid: true };
 }
 
+async function getProfessorCourse(body) {
+    const existingProfessorCourse = await prisma.professorCourse.findFirst({
+        where: {
+            id_course: body.id_course.trim(),
+            id_professor: body.id_professor.trim(),
+        },
+    });
+    return existingProfessorCourse;
+}
+
+async function createProfessorCourse(body) {
+    const newProfessorCourse = await prisma.professorCourse.create({
+        data: {
+            id_course: body.id_course.trim(),
+            id_professor: body.id_professor.trim(),
+        },
+    });
+    return newProfessorCourse;
+}
 
 //POST method to assign a course to a professor
 export async function POST(request) {
@@ -21,80 +42,52 @@ export async function POST(request) {
         }
 
         // Check if the course already exists
-        const existingCourse = await prisma.course.findUnique({
-            where: {
-                id_course: body.id_course.trim(),
-            }
-        });
+        const existingCourse = await getCourse(body);
         if (!existingCourse) {
             return NextResponse.json({ error: "No existe el curso" }, { status: 404 });
         }
 
         // Check if the professor already exists
-        const existingProfessor = await prisma.professor.findUnique({
-            where: {
-                id_professor: body.id_professor.trim(),
-            }
-        });
+        const existingProfessor = await getProfessor(body);
         if (!existingProfessor) {
             return NextResponse.json({ error: "No existe el profesor" }, { status: 404 });
         }
 
-        const existingCourseProfesor = await prisma.professorCourse.findUnique({
-            where:{
-                id_professor_id_course: {
-                    id_course: body.id_course.trim(),
-                    id_professor: body.id_professor.trim(),
-                }
-            }
-        })
+        const existingCourseProfesor = await getProfessorCourse(body);
         if(existingCourseProfesor){
             return NextResponse.json({ error: "El curso ya esta asignado al profesor" }, { status: 409 });
         }
 
         // Assign the course to the professor
-        const newProfessorCourse = await prisma.professorCourse.create({
-            data: {
-                id_course: body.id_course.trim(),
-                id_professor: body.id_professor.trim(),
-            },
-        });
-
+        const newProfessorCourse = await createProfessorCourse(body);
         return NextResponse.json(newProfessorCourse, { status: 201 });
-
     } catch (error) {
-        console.error("Error al asignarle el curso al profesor:", error);
-        return NextResponse.json(
-            { error: "Error al asignarle el curso al profesor:" },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Error al asignarle el curso al profesor:" },{ status: 500 });
     }
+}
+
+async function getProfessorCourses() {
+    const professorCourses = await prisma.professorCourse.findMany({
+        include: {
+            course: true, 
+            professor: true 
+        }
+    });
+    const result = professorCourses.map(pc => ({
+        id: pc.id_professor_course.toString(),
+        courseId: pc.id_course.toString(),
+        courseName: pc.course.name, 
+        professorId: pc.id_professor.toString(),
+        professorName: pc.professor.name 
+    }));
+    return result;
 }
 
 export async function GET(request) {
     try {
-        const professorCourses = await prisma.professorCourse.findMany({
-            include: {
-                id_professor_course: true,
-                course: true, 
-                professor: true 
-            }
-        });
-
-        const result = professorCourses.map(pc => ({
-            id: pc.id_professor_course.toString(),
-            courseId: pc.id_course.toString(),
-            courseName: pc.course.name, 
-            professorId: pc.id_professor.toString(),
-            professorName: pc.professor.name 
-        }));
-
+        const result = await getProfessorCourses();
         return NextResponse.json(result, { status: 200 });
     } catch (error) {
-        console.error("Error obteniendo los cursos asignados al profesor", error);
-        return NextResponse.json(
-            { error: "Error obteniendo los cursos asignados al profesor" },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Error obteniendo los cursos asignados al profesor" },{ status: 500 });
     }
 }

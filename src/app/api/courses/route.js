@@ -55,7 +55,6 @@ export async function POST(request) {
   }
 }
 
-
 async function getCourses() {
   const courses = await prisma.course.findMany();
   return courses;

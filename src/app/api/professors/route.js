@@ -8,7 +8,7 @@ function validateCreateProfessor(body) {
     return { valid: true };
 }
 
-async function getProfessor(body) {
+export async function getProfessor(body) {
     const existingProfessor = await prisma.professor.findUnique({
         where: {
             id_professor: body.id_professor.toString().trim(),
