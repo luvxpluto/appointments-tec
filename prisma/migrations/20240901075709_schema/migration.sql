@@ -61,9 +61,7 @@ CREATE TABLE "AppointmentSchedule" (
 CREATE TABLE "Appointment" (
     "id_appointment" SERIAL NOT NULL,
     "id_appointment_schedule" INTEGER NOT NULL,
-    "date" TEXT NOT NULL,
-    "start_time" TEXT NOT NULL,
-    "day" TEXT NOT NULL,
+    "date_time" TIMESTAMP(3) NOT NULL,
     "id_student" TEXT,
     "is_reserved" BOOLEAN NOT NULL,
     "is_available" BOOLEAN NOT NULL,
