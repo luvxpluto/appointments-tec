@@ -8,7 +8,7 @@ function validateCreateCourse(body) {
   return {valid: true};
 }
 
-async function getCourse(body) {
+export async function getCourse(body) {
   const existingCourse = await prisma.course.findFirst({
     where: {
       id_course: body.id_course.trim(),

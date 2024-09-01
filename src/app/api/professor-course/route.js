@@ -8,6 +8,7 @@ function validateAsignCourse(body) {
     return { valid: true };
 }
 
+
 //POST method to assign a course to a professor
 export async function POST(request) {
     try {
