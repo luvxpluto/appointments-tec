@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCurrentSemester } from "@/app/api/semester/route";
 
-function validateSchedule(body){
+function validateSchedule(body) {
     if (
         !body || 
         !body.id_professor_course || body.id_professor_course.trim() === "" || 
@@ -17,13 +17,13 @@ function validateSchedule(body){
     return { valid: true };
 }
 
-function getNextDayOfWeek(date, dayOfWeek){
+function getNextDayOfWeek(date, dayOfWeek) {
     const resultDate = new Date(date.getTime());
     resultDate.setDate(date.getDate() + (7 + dayOfWeek - date.getDay()) % 7);
     return resultDate;
 }
 
-function getDatesForDayOfWeek(startDate, endDate, dayOfWeek){
+function getDatesForDayOfWeek(startDate, endDate, dayOfWeek) {
     const dates = [];
     let currentDate = getNextDayOfWeek(new Date(startDate), dayOfWeek);
     const endDateTime = new Date(endDate).getTime();
@@ -35,25 +35,25 @@ function getDatesForDayOfWeek(startDate, endDate, dayOfWeek){
     return dates;
 }
 
-function parseTimeString(timeString){
+function parseTimeString(timeString) {
     const [hours, minutes] = timeString.split(':').map(Number);
     return { hours, minutes };
 }
 
-function calculateAppointmentDuration(startTime, endTime, numberOfAppointments){
+function calculateAppointmentDuration(startTime, endTime, numberOfAppointments) {
     const start = new Date(2000, 0, 1, startTime.hours, startTime.minutes);
     const end = new Date(2000, 0, 1, endTime.hours, endTime.minutes);
     const totalMinutes = (end - start) / 60000; // Diferencia en minutos
     return Math.floor(totalMinutes / numberOfAppointments);
 }
 
-function createDateWithTime(date, time){
+function createDateWithTime(date, time) {
     const newDate = new Date(date);
     newDate.setHours(time.hours, time.minutes, 0, 0);
     return newDate;
 }
 
-async function getSchedule(body, currentSemester){
+async function getSchedule(body, currentSemester) {
     const existingSchedule = await prisma.appointmentSchedule.findFirst({
         where: {
             id_professor_course: parseInt(body.id_professor_course),
@@ -64,7 +64,7 @@ async function getSchedule(body, currentSemester){
     return existingSchedule;
 }
 
-async function createSchedule(body, currentSemester, startTime, endTime, duration_appointment){
+async function createSchedule(body, currentSemester, startTime, endTime, duration_appointment) {
     const newSchedule = await prisma.appointmentSchedule.create({
         data: {
             id_professor_course: parseInt(body.id_professor_course.trim()),
@@ -80,7 +80,7 @@ async function createSchedule(body, currentSemester, startTime, endTime, duratio
     return newSchedule;
 }
 
-async function createAppointmentsData(currentSemester, newSchedule, body, startTime, duration_appointment){
+async function createAppointmentsData(currentSemester, newSchedule, body, startTime, duration_appointment) {
     const dayOfWeek = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'].indexOf(body.day.trim().toLowerCase());
     const semesterDates = getDatesForDayOfWeek(currentSemester.start_date, currentSemester.end_date, dayOfWeek);
 
@@ -101,46 +101,73 @@ async function createAppointmentsData(currentSemester, newSchedule, body, startT
     return appointments;
 }
 
-async function createAppointments(appointments){
+async function createAppointments(appointments) {
     await prisma.appointment.createMany({ data: appointments });
 }
 
 export async function POST(request) {
+    let newSchedule;
     try {
         const body = await request.json();
+
         // Validate the request body
         const validation = validateSchedule(body);
         if (!validation.valid) {
             return NextResponse.json({ error: validation.error }, { status: 400 });
         }
+
         //Check if there's a current semester
         const currentSemester = await getCurrentSemester();
         if (!currentSemester) {
             return NextResponse.json({ error: "No hay un semestre activo actualmente" }, { status: 400 });
         }
+
         //Check if the schedule already exists -> Same day -> Can change if needed
         const existingSchedule = await getSchedule(body, currentSemester);
         if (existingSchedule) {
             return NextResponse.json({ error: "Ya existe un horario para este curso y día en el semestre actual" }, { status: 400 });
         }
+
         //Parse time strings to objects
         const startTime = parseTimeString(body.start_time.trim());
         const endTime = parseTimeString(body.end_time.trim());
+
         //Calculate duration of each appointment
-        const duration_appointment = calculateAppointmentDuration(startTime,endTime, parseInt(body.number_appointments));
+        const duration_appointment = calculateAppointmentDuration(startTime, endTime, parseInt(body.number_appointments));
 
         try {
             //Create the schedule
-            const newSchedule = await createSchedule(body, currentSemester, startTime, endTime, duration_appointment);
+            newSchedule = await createSchedule(body, currentSemester, startTime, endTime, duration_appointment);
+
             //Create the appointments
             const appointments = await createAppointmentsData(currentSemester, newSchedule, body, startTime, duration_appointment);
+
             // Create the appointments in the database
-            createAppointments(appointments);
+            await createAppointments(appointments);
         } catch (error) {
             return NextResponse.json({ error: "Error al crear las horas de consulta y las citas" }, { status: 500 });
         }
-        return NextResponse.json(newSchedule, { status: 201 });
+
+        if (newSchedule) {
+            console.log("Proceso completado exitosamente");
+            return NextResponse.json(newSchedule, { status: 201 });
+        } else {
+            return NextResponse.json({ error: "No se pudo crear el horario" }, { status: 500 });
+        }
     } catch (error) {
+        console.error("Error general en el proceso POST:", error);
         return NextResponse.json({ error: "Error al crear las horas de consulta y las citas" }, { status: 500 });
+    }
+}
+
+export async function DELETE(request) {
+    try {
+        await prisma.appointment.deleteMany({});
+        await prisma.appointmentSchedule.deleteMany({});
+        return NextResponse.json({ message: "Horarios y citas eliminados" }, { status: 200 });
+    }
+    catch (error) {
+        console.error("Error en el proceso DELETE:", error);
+        return NextResponse.json({ error: "Error al eliminar los horarios y citas" }, { status: 500 });
     }
 }
