@@ -46,9 +46,10 @@ CREATE TABLE "StudentCourse" (
 CREATE TABLE "AppointmentSchedule" (
     "id_appointment_schedule" SERIAL NOT NULL,
     "id_professor_course" INTEGER NOT NULL,
-    "start_time" TIMESTAMP(3) NOT NULL,
-    "end_time" TIMESTAMP(3) NOT NULL,
+    "start_time" TEXT NOT NULL,
+    "end_time" TEXT NOT NULL,
     "number_appointments" INTEGER NOT NULL,
+    "number_appointments_reserve" INTEGER NOT NULL,
     "duration_appointment" INTEGER NOT NULL,
     "day_of_week" TEXT NOT NULL,
     "id_semester" INTEGER NOT NULL,
@@ -60,9 +61,12 @@ CREATE TABLE "AppointmentSchedule" (
 CREATE TABLE "Appointment" (
     "id_appointment" SERIAL NOT NULL,
     "id_appointment_schedule" INTEGER NOT NULL,
-    "date_time" TIMESTAMP(3) NOT NULL,
+    "date" TEXT NOT NULL,
+    "start_time" TEXT NOT NULL,
+    "day" TEXT NOT NULL,
     "id_student" TEXT,
     "is_reserved" BOOLEAN NOT NULL,
+    "is_available" BOOLEAN NOT NULL,
 
     CONSTRAINT "Appointment_pkey" PRIMARY KEY ("id_appointment")
 );
