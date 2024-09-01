@@ -56,9 +56,10 @@ model AppointmentSchedule {
   id_appointment_schedule Int @id @default(autoincrement())
   professorCourse         ProfessorCourse @relation(fields: [id_professor_course], references: [id_professor_course])
   id_professor_course     Int
-  start_time              DateTime
-  end_time                DateTime
+  start_time              String
+  end_time                String
   number_appointments     Int
+  number_appointments_reserve Int
   duration_appointment    Int // in minutes
   day_of_week             String
   Semester                Semester @relation(fields: [id_semester], references: [id_semester])
@@ -72,10 +73,11 @@ model Appointment {
   id_appointment Int @id @default(autoincrement())
   schedule       AppointmentSchedule @relation(fields: [id_appointment_schedule], references: [id_appointment_schedule])
   id_appointment_schedule Int
-  date_time           DateTime
+  date_time          DateTime
   student             Student? @relation(fields: [id_student], references: [id_student])
   id_student          String?
   is_reserved         Boolean
+  is_available        Boolean
 }
 
 model Semester{

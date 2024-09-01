@@ -35,6 +35,27 @@ async function validateSemesterDate(body) {
     }
 }
 
+export async function getCurrentSemester(){
+    try {
+        const currentDate = new Date();
+        const currentSemester = await prisma.semester.findFirst({
+            where: {
+                start_date: {
+                    lte: currentDate.toISOString(),
+                },
+                end_date: {
+                    gte: currentDate.toISOString(),
+                },
+            },
+        });
+
+        return currentSemester;
+    } catch (error) {
+        console.error("Error al obtener el semestre actual:", error);
+        throw new Error("Error al obtener el semestre actual");
+    }
+}
+
 //POST method to create a semester
 export async function POST(request) {
     try {
@@ -69,22 +90,8 @@ export async function POST(request) {
 //Get semester of current date
 export async function GET(request) {
     try {
-        const currentDate = new Date();
-        const currentSemester = await prisma.semester.findFirst({
-            where: {
-                start_date: {
-                    lte: currentDate.toISOString(),
-                },
-                end_date: {
-                    gte: currentDate.toISOString(),
-                },
-            },
-            select:{
-                id_semester: true
-            }
-        });
-
-        return NextResponse.json(currentSemester, { status: 200 });
+        const semester = await getCurrentSemester();
+        return NextResponse.json(semester, { status: 200 });
     } catch (error) {
         console.error("Error al obtener el semestre actual:", error);
         return NextResponse.json({ error: "Error al obtener el semestre actual" }, { status: 500 });
