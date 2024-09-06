@@ -128,9 +128,13 @@ export function StudentForm() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="name">Nombre</FormLabel>
+                    <FormLabel htmlFor="name">Profesor</FormLabel>
                     <FormControl>
-                      <Input id="name" placeholder="David Jiménez" {...field} />
+                      <Input id="profesor" placeholder="David Jiménez" {...field} />
+                    </FormControl>
+                    <FormLabel htmlFor="name">Estudiante</FormLabel>
+                    <FormControl>
+                      <Input id="estudiante" placeholder="David Jiménez" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
