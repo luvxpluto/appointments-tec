@@ -45,9 +45,10 @@ import {
 import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
 import { toast } from '@/components/ui/use-toast';
 
+
 // Esquema modificado para aceptar el id como string
-const professorSchema = z.object({
-  id_professor: z.string({ required_error: 'El profesor es obligatorio' }),
+const courseSchema = z.object({
+  id_course: z.string({ required_error: 'El curso es obligatorio' }),
   id_student: z.string({ required_error: 'El estudiante es obligatorio' }),
 });
 
@@ -69,23 +70,23 @@ const Slider = ({ className, ...props }) => (
 export { Slider };
 
 export function StudentForm() {
-  const form = useForm<z.infer<typeof professorSchema>>({
-    resolver: zodResolver(professorSchema),
+  const form = useForm<z.infer<typeof courseSchema>>({
+    resolver: zodResolver(courseSchema),
     defaultValues: {
-      id_professor: '',
+      id_course: '',
       id_student: '',
     },
   });
 
-  const [professors, setProfessors] = React.useState([]);
+  const [courses, setCourses] = React.useState([]);
   const [students, setStudents] = React.useState([]);
-  const [openProfessor, setOpenProfessor] = React.useState(false);
+  const [openCourse, setOpenCourse] = React.useState(false);
   const [openStudent, setOpenStudent] = React.useState(false);
   const [rating, setRating] = React.useState(0);
 
   React.useEffect(() => {
-    // Fetch professors and students data
-    fetch('/api/professors').then((res) => res.json()).then(setProfessors);
+    // Fetch courses and students data
+    fetch('/api/courses').then((res) => res.json()).then(setCourses);
     fetch('/api/students').then((res) => res.json()).then(setStudents);
   }, []);
 
@@ -96,25 +97,27 @@ export function StudentForm() {
   const renderStars = () => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
-      if (rating >= i) {
-        stars.push(<span key={i} className="text-yellow-500 text-4xl">&#9733;</span>); // Estrella llena
-      } else if (rating >= i - 0.5) {
-        stars.push(<span key={i} className="text-yellow-500 text-4xl">&#9734;</span>); // Media estrella
-      } else {
-        stars.push(<span key={i} className="text-gray-300 text-4xl">&#9734;</span>); // Estrella vacía
-      }
+      stars.push(
+        <span key={i} className={`text-4xl ${rating >= i ? "text-yellow-500" : "text-gray-300"}`}>
+          &#9733;
+        </span>
+      );
     }
     return stars;
   };
 
   const onSubmit = async (data: any) => {
     try {
-      const response = await fetch('/api/register-rating', {
+      const response = await fetch('/api/professor-rating', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          id_student: data.id_student,
+          id_course: data.id_course,
+          stars_rating: rating, // Envía la calificación (rating)
+        }),
       });
 
       if (response.ok) {
@@ -142,58 +145,58 @@ export function StudentForm() {
     <Card className="w-[400px]">
       <CardHeader>
         <CardTitle>Registrar calificación de alumno</CardTitle>
-        <CardDescription>Elige un profesor y un estudiante para asignar una calificación.</CardDescription>
+        <CardDescription>Elige un curso y un estudiante para asignar una calificación.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid w-full items-center gap-5">
-              {/* Combobox de profesor */}
+              {/* Combobox de curso */}
               <FormField
                 control={form.control}
-                name="id_professor"
+                name="id_course"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="id_professor">Profesor</FormLabel>
-                    <Popover open={openProfessor} onOpenChange={setOpenProfessor}>
+                    <FormLabel htmlFor="id_course">Curso</FormLabel>
+                    <Popover open={openCourse} onOpenChange={setOpenCourse}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
                             variant="outline"
                             role="combobox"
-                            aria-expanded={openProfessor}
+                            aria-expanded={openCourse}
                             className={cn(
                               "w-[350px] justify-between",
                               !field.value && "text-muted-foreground"
                             )}
                           >
                             {field.value
-                              ? professors.find((professor) => professor.id_professor === field.value)?.name
-                              : 'Selecciona un profesor'}
+                              ? courses.find((course) => course.id_course === field.value)?.name
+                              : 'Selecciona un curso'}
                             <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-[350px] p-0">
                         <Command>
-                          <CommandInput placeholder="Buscar profesor" className="h-9" />
+                          <CommandInput placeholder="Buscar curso" className="h-9" />
                           <CommandList>
-                            <CommandEmpty>No se encontraron profesores</CommandEmpty>
+                            <CommandEmpty>No se encontraron cursos</CommandEmpty>
                             <CommandGroup>
-                              {professors.map((professor) => (
+                              {courses.map((course) => (
                                 <CommandItem
-                                  key={professor.id_professor}
-                                  value={`${professor.id_professor} - ${professor.name}`}
+                                  key={course.id_course}
+                                  value={`${course.id_course} - ${course.name}`}
                                   onSelect={() => {
-                                    form.setValue("id_professor", professor.id_professor); 
-                                    setOpenProfessor(false); // Cierra el Popover al seleccionar
+                                    form.setValue("id_course", course.id_course);
+                                    setOpenCourse(false); // Cierra el Popover al seleccionar
                                   }}
                                 >
-                                  {professor.id_professor} - {professor.name}
+                                  {course.id_course} - {course.name}
                                   <CheckIcon
                                     className={cn(
                                       "ml-auto h-4 w-4",
-                                      professor.id_professor === field.value ? "opacity-100" : "opacity-0"
+                                      course.id_course === field.value ? "opacity-100" : "opacity-0"
                                     )}
                                   />
                                 </CommandItem>
@@ -244,7 +247,7 @@ export function StudentForm() {
                                   key={student.id_student}
                                   value={`${student.id_student} - ${student.name}`}
                                   onSelect={() => {
-                                    form.setValue("id_student", student.id_student); 
+                                    form.setValue("id_student", student.id_student);
                                     setOpenStudent(false); // Cierra el Popover al seleccionar
                                   }}
                                 >
@@ -266,30 +269,30 @@ export function StudentForm() {
                 )}
               />
 
-              {/* Estrellas de calificación y slider */}
+              {/* Estrellas de calificación */}
               <div className="flex items-center justify-center mb-4">
                 {renderStars()}
-                <span className="ml-2 text-gray-700">{rating.toFixed(1)}</span>
+                <span className="ml-2 text-gray-700">{rating}</span>
               </div>
+
+              {/* Slider de calificación */}
               <Slider
-                defaultValue={[0]}
+                defaultValue={[1]}
                 min={1}
                 max={5}
-                step={0.5}
-                onValueChange={handleSliderChange}
+                step={1} // Cambiado a enteros
+                onValueChange={(value) => setRating(value[0])}
                 className="w-full"
               />
             </div>
             <CardFooter className="flex justify-center mt-4">
-              <Button type="submit">Asignar</Button>
+              <Button type="submit">Registrar</Button>
             </CardFooter>
           </form>
         </Form>
       </CardContent>
     </Card>
-);
-
-  
+  );
 }
 
 export default StudentForm;
