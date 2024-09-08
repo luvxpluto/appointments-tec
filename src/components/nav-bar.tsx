@@ -60,7 +60,7 @@ const componentsCourses: { title: string; href: string; description: string }[] 
     },
     {
       title: "Soliciar cita",
-      href: "",
+      href: "/appointment-form",
       description:
         "Soliciar cita con un profesor.",
     },
