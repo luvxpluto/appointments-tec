@@ -39,15 +39,15 @@ const componentsProfessor: { title: string; href: string; description: string }[
     },
     {
       title: "Registrar los cursos que imparte el profesor",
-      href: "",
+      href: "/professor-course-form",
       description:
         "Se debe registrar los cursos que imparte el profesor para que pueda solicitar una cita.",
     },
     {
       title: "Cambiar rating de un estudiante",
-      href: "",
+      href: "/professor-calification",
       description:
-        "AHSahsahsb",
+        "Elija un estudiante para calificar su participación en la cita.",
     },
 ]
 

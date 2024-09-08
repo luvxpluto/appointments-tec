@@ -22,7 +22,7 @@ model Course {
 }
 
 model Professor {
-  id_professor Int @id @default(autoincrement())
+  id_professor String @id
   name        String
 
   courses ProfessorCourse[]
@@ -31,7 +31,7 @@ model Professor {
 model ProfessorCourse{
   id_professor_course Int @id @default(autoincrement())
   professor           Professor @relation(fields: [id_professor], references: [id_professor])
-  id_professor        Int
+  id_professor        String
   course              Course @relation(fields: [id_course], references: [id_course])
   id_course           String
   appointments AppointmentSchedule[]
@@ -56,11 +56,14 @@ model AppointmentSchedule {
   id_appointment_schedule Int @id @default(autoincrement())
   professorCourse         ProfessorCourse @relation(fields: [id_professor_course], references: [id_professor_course])
   id_professor_course     Int
-  start_time              DateTime
-  end_time                DateTime
+  start_time              String
+  end_time                String
   number_appointments     Int
+  number_appointments_reserve Int
   duration_appointment    Int // in minutes
   day_of_week             String
+  Semester                Semester @relation(fields: [id_semester], references: [id_semester])
+  id_semester             Int
   appointments            Appointment[]
 
   @@unique([id_professor_course, day_of_week])
@@ -70,17 +73,16 @@ model Appointment {
   id_appointment Int @id @default(autoincrement())
   schedule       AppointmentSchedule @relation(fields: [id_appointment_schedule], references: [id_appointment_schedule])
   id_appointment_schedule Int
-  date_time           DateTime
+  date_time          DateTime
   student             Student? @relation(fields: [id_student], references: [id_student])
   id_student          String?
   is_reserved         Boolean
-  semester            Semester @relation(fields: [id_semester], references: [id_semester])
-  id_semester         Int
+  is_available        Boolean
 }
 
 model Semester{
   id_semester Int @id @default(autoincrement())
   start_date  DateTime
   end_date    DateTime
-  appointments Appointment[]
+  appointments AppointmentSchedule[]
 }

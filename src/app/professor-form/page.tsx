@@ -31,9 +31,18 @@ import { toast } from '@/components/ui/use-toast';
 // Esquema modificado para aceptar el id como string y luego transformarlo a número
 const professorSchema = z.object({
     name: z.string().min(2, { message: 'El nombre debe tener al menos 2 caracteres' }),
+    id_professor: z.string()
+        .min(1,{ message: 'El ID del profesor es obligatorio' })
+        .transform((val) => {
+            const parsed = parseInt(val, 10);
+            if (isNaN(parsed)) {
+                throw new Error('El ID del profesor debe ser un número');
+            }
+            return parsed;
+        }),
 });
 
-export function StudentForm(){
+export function ProfessorForm(){
     const form = useForm<z.infer<typeof professorSchema>>({
         resolver: zodResolver(professorSchema),
         defaultValues: {
@@ -54,7 +63,7 @@ export function StudentForm(){
             if (response.ok) {
                 const result = await response.json();
                 toast({
-                    title: "Profesor Registrado",
+                    title: "Profesor registrado",
                     description: `El profesor ${result.name} ha sido registrado exitosamente.`,
                 });
             } else {
@@ -85,6 +94,19 @@ export function StudentForm(){
                         <div className="grid w-full items-center gap-5">
                             <FormField
                                 control={form.control}
+                                name="id_professor"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel htmlFor="id_professor">ID del profesor</FormLabel>
+                                        <FormControl>
+                                            <Input id="id_professor" placeholder="305890345" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem>
@@ -107,4 +129,4 @@ export function StudentForm(){
     );
 }
 
-export default StudentForm;
+export default ProfessorForm;
