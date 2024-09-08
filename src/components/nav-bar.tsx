@@ -24,7 +24,7 @@ const componentsStudent: { title: string; href: string; description: string }[] 
   },
   {
     title: "Registrar los cursos del estudiante",
-    href: "",
+    href: "/student-course-registration-form",
     description:
       "Se debe registrar los cursos del estudiante para que pueda solicitar una cita.",
   },
