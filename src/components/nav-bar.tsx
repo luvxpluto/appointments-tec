@@ -49,6 +49,12 @@ const componentsProfessor: { title: string; href: string; description: string }[
       description:
         "Elija un estudiante para calificar su participación en la cita.",
     },
+    {
+      title: "Registrar hora de consulta",
+      href: "/schedule-form",
+      description:
+        "Formulario para registrar la hora de consulta de un profesor.",
+    }
 ]
 
 const componentsCourses: { title: string; href: string; description: string }[] = [
@@ -63,7 +69,7 @@ const componentsCourses: { title: string; href: string; description: string }[] 
       href: "",
       description:
         "Soliciar cita con un profesor.",
-    },
+    }
 ]
 
 
