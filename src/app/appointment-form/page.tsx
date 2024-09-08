@@ -16,13 +16,34 @@ export function VehicleSliderPage() {
     const [step, setStep] = React.useState(1); 
     const [inputNumber, setInputNumber] = React.useState('');
     const [studentName, setStudentName] = React.useState<string | null>(null);
-    const [courses, setCourses] = React.useState<string[]>([]);  // Inicializado como array vacío
+    const [courses, setCourses] = React.useState<string[]>([]);  
     const [error, setError] = React.useState<string | null>(null);
-    const [selectedCourse, setSelectedCourse] = React.useState<string | null>(null); // Nuevo estado para el curso seleccionado
+    const [selectedCourse, setSelectedCourse] = React.useState<string | null>(null); 
     const [selectedPlace, setSelectedPlace] = React.useState<string | null>(null);
     const [selectedVehicle, setSelectedVehicle] = React.useState<string | null>(null);
-    const vehicles = Array.from({ length: 30 }, (_, i) => `Vehículo ${i + 1}`);
     const sliderRef = React.useRef<HTMLDivElement | null>(null);
+    const [currentIndex, setCurrentIndex] = React.useState(0);
+
+    // Genera una lista de fechas y horas consecutivas con incrementos de 30 minutos
+    const generateDateTimes = () => {
+        const startDate = new Date('2024-09-07T07:30:00');
+        const endDate = new Date('2024-09-07T17:00:00');
+        const interval = 30; // Intervalo de 30 minutos
+        const dateTimes = [];
+
+        let currentDate = startDate;
+        while (currentDate < endDate) {
+            const nextDate = new Date(currentDate.getTime() + interval * 60000); // Añade 30 minutos
+            const date = currentDate.toLocaleDateString(); // Solo la fecha
+            const timeRange = `${currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${nextDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`; // Solo las horas
+            dateTimes.push({ date, timeRange });
+            currentDate = nextDate;
+        }
+
+        return dateTimes;
+    };
+
+    const dateTimes = generateDateTimes();
 
     // Función para manejar la búsqueda basada en el número ingresado
     const handleSearch = async () => {
@@ -59,15 +80,11 @@ export function VehicleSliderPage() {
     };
 
     const handleNextSlide = () => {
-        if (sliderRef.current) {
-            sliderRef.current.scrollLeft += 300;
-        }
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % dateTimes.length);
     };
 
     const handlePrevSlide = () => {
-        if (sliderRef.current) {
-            sliderRef.current.scrollLeft -= 300;
-        }
+        setCurrentIndex((prevIndex) => (prevIndex - 1 + dateTimes.length) % dateTimes.length);
     };
 
     return (
@@ -106,8 +123,7 @@ export function VehicleSliderPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {/* Si tiene cursos, mostrar un select. Si no, mostrar un mensaje */}
-                        {courses && courses.length > 0 ? (
+                        {courses && courses.length >= 0 ? (
                             <div className="flex flex-col gap-4">
                                 <select
                                     value={selectedCourse || ""}
@@ -124,7 +140,7 @@ export function VehicleSliderPage() {
                                 <Button
                                     onClick={() => handleSelectPlace('Lugar de Prueba')}
                                     className="w-full py-2 rounded-lg border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-300"
-                                    disabled={!selectedCourse}  // Deshabilitar si no ha seleccionado un curso
+                                    //disabled={!selectedCourse}
                                 >
                                     Ir a Seleccionar Vehículo
                                 </Button>
@@ -136,34 +152,33 @@ export function VehicleSliderPage() {
                 </div>
             )}
 
-            {/* Paso 3: Seleccionar vehículo */}
+            {/* Paso 3: Seleccionar cita */}
             {step === 3 && (
                 <div>
                     <CardHeader>
-                        <CardTitle className="text-2xl font-semibold text-gray-800 dark:text-white">Seleccione un vehículo</CardTitle>
-                        <CardDescription className="text-md text-gray-500 mt-1 dark:text-gray-400">Desliza y selecciona un vehículo</CardDescription>
+                        <CardTitle className="text-2xl font-semibold text-gray-800 dark:text-white">Seleccione una Cita</CardTitle>
+                        <CardDescription className="text-md text-gray-500 mt-1 dark:text-gray-400">Deslice y seleccione una cita que se ajuste a sus preferencias</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="relative mt-6">
                             <div
                                 ref={sliderRef}
-                                className="flex overflow-x-auto gap-4 py-4"
+                                className="flex overflow-hidden justify-center items-center"
                                 style={{
+                                    width: '100%',
+                                    height: '160px',
                                     scrollBehavior: "smooth",
-                                    scrollbarWidth: "thin",
-                                    scrollbarColor: "#a0a0a0 transparent",
                                 }}
                             >
-                                {vehicles.map((vehicle) => (
-                                    <Button
-                                        key={vehicle}
-                                        onClick={() => handleSelectVehicle(vehicle)}
-                                        variant={selectedVehicle === vehicle ? 'default' : 'outline'}
-                                        className={`w-[140px] h-[140px] text-base rounded-lg flex items-center justify-center border ${selectedVehicle === vehicle ? 'text-white' : 'text-gray-700 dark:text-gray-300 dark:border-gray-500'} transition-all duration-200 hover:shadow-lg`}
-                                    >
-                                        {vehicle}
-                                    </Button>
-                                ))}
+                                <Button
+                                    key={dateTimes[currentIndex].date + dateTimes[currentIndex].timeRange}
+                                    onClick={() => handleSelectVehicle(dateTimes[currentIndex].date + ' ' + dateTimes[currentIndex].timeRange)}
+                                    variant={selectedVehicle === dateTimes[currentIndex].date + ' ' + dateTimes[currentIndex].timeRange ? 'default' : 'outline'}
+                                    className={`w-[200px] h-[100px] text-base rounded-lg flex flex-col items-center justify-center border ${selectedVehicle === dateTimes[currentIndex].date + ' ' + dateTimes[currentIndex].timeRange ? 'text-white' : 'text-gray-700 dark:text-gray-300 dark:border-gray-500'} transition-all duration-200 hover:shadow-lg`}
+                                >
+                                    <span>{dateTimes[currentIndex].date}</span>
+                                    <span>{dateTimes[currentIndex].timeRange}</span>
+                                </Button>
                             </div>
                         </div>
                         <div className="mt-6 text-center">
@@ -175,7 +190,7 @@ export function VehicleSliderPage() {
                         </div>
                     </CardContent>
                     <CardFooter className="flex justify-center mt-6">
-                        <p className="text-md text-gray-600 dark:text-gray-400">Desliza entre las opciones y selecciona tu vehículo favorito</p>
+                        <p className="text-md text-gray-600 dark:text-gray-400">Desliza entre las opciones y selecciona tu cita favorita</p>
                     </CardFooter>
 
                     {/* Botones de navegación */}
