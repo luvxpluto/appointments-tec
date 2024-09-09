@@ -1,0 +1,108 @@
+async function getAppointmentList(studentId, professorCourseId, currentWeek) {
+    
+    // 1. Obtener información del estudiante y las veces que ha llevado el curso.
+    const studentCourse = await prisma.studentCourse.findFirst({
+        where: { id_student: studentId, id_professor_course: professorCourseId },
+        select: { enrollment_count: true, stars_rating: true }
+    });
+
+    // 2. Obtener todas las citas de ese curso con su tasa de disponibilidad.
+    const appointmentSchedules = await prisma.appointmentSchedule.findMany({
+        where: { id_professor_course: professorCourseId },
+        include: {
+            appointments: true
+        }
+    });
+
+    // 3. Calcular la tasa de disponibilidad de citas
+    let availableAppointments = appointmentSchedules.map(schedule => {
+        let availabilityRate = (schedule.number_appointments_reserve / schedule.number_appointments) * 100;
+        return {
+            scheduleId: schedule.id_appointment_schedule,
+            appointments: schedule.appointments,
+            availabilityRate: availabilityRate,
+            week: getWeek(schedule.start_time), // Función para obtener la semana de la cita
+            isReserved: schedule.appointments.some(a => a.is_reserved),
+            isAvailable: schedule.appointments.some(a => a.is_available)
+        };
+    });
+
+    // 4. Aplicar las reglas de priorización dependiendo de las estrellas y cantidad de veces que ha llevado el curso.
+    let prioritizedAppointments = [];
+
+    // === Estudiante ha llevado el curso 0 veces ===
+    if (studentCourse.enrollment_count === 0) {
+        if (studentCourse.stars_rating === 1) {
+            // Criterio: Próxima cita no reservada
+            prioritizedAppointments = availableAppointments.filter(a => a.isAvailable);
+        } else if (studentCourse.stars_rating === 2) {
+            prioritizedAppointments = availableAppointments.filter(a => {
+                if (a.isAvailable && a.week === currentWeek) return true;
+                if (a.isReserved && a.availabilityRate >= 70 && a.week === currentWeek) return true;
+                return a.isAvailable && a.week !== currentWeek;
+            });
+        } else if (studentCourse.stars_rating === 3) {
+            prioritizedAppointments = availableAppointments.filter(a => {
+                if (a.isAvailable && a.week === currentWeek) return true;
+                if (a.isReserved && a.availabilityRate >= 50 && a.week === currentWeek) return true;
+                return a.isAvailable || a.isReserved && a.week !== currentWeek;
+            });
+        }
+    }
+
+    // === Estudiante ha llevado el curso 1 vez ===
+    else if (studentCourse.enrollment_count === 1) {
+        if (studentCourse.stars_rating === 1) {
+            prioritizedAppointments = availableAppointments.filter(a => a.isAvailable);
+        } else if (studentCourse.stars_rating === 2) {
+            prioritizedAppointments = availableAppointments.filter(a => {
+                if (a.isReserved && a.availabilityRate >= 50 && a.week === currentWeek) return true;
+                if (a.isAvailable && a.week === currentWeek) return true;
+                if (a.isAvailable && a.week !== currentWeek) return true;
+                return a.isAvailable && a.week === currentWeek && a.availabilityRate >= 70;
+            });
+        } else if (studentCourse.stars_rating === 3) {
+            prioritizedAppointments = availableAppointments.filter(a => {
+                if (a.isReserved && a.week === currentWeek) return true;
+                if (a.isAvailable && a.week === currentWeek) return true;
+                return a.isReserved || a.isAvailable;
+            });
+        }
+    }
+
+    // === Estudiante ha llevado el curso 2 o más veces ===
+    else if (studentCourse.enrollment_count >= 2) {
+        if (studentCourse.stars_rating === 1) {
+            prioritizedAppointments = availableAppointments.filter(a => {
+                if (a.isAvailable) return true;
+                if (a.isReserved && a.availabilityRate >= 35 && a.week === currentWeek) return true;
+                return a.isAvailable || a.isReserved && a.availabilityRate >= 60;
+            });
+        } else if (studentCourse.stars_rating === 3) {
+            prioritizedAppointments = availableAppointments.filter(a => {
+                if (a.isReserved && a.week === currentWeek) return true;
+                if (a.isAvailable && a.week === currentWeek) return true;
+                return a.isAvailable || a.isReserved;
+            });
+        }
+    }
+
+    // 5. Ordenar las citas según los criterios de prioridad
+    prioritizedAppointments.sort((a, b) => {
+        // Ordenar primero por semana (las de la misma semana van primero)
+        if (a.week !== b.week) return a.week - b.week;
+        // Si están en la misma semana, ordenar por disponibilidad (no reservadas primero)
+        if (a.isAvailable !== b.isAvailable) return a.isAvailable ? -1 : 1;
+        return 0;
+    });
+
+    return prioritizedAppointments;
+}
+
+// Función auxiliar para obtener la semana de la cita
+function getWeek(dateString) {
+    const date = new Date(dateString);
+    const startOfYear = new Date(date.getFullYear(), 0, 1);
+    const days = Math.floor((date - startOfYear) / (24 * 60 * 60 * 1000));
+    return Math.ceil(days / 7);
+}

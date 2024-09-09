@@ -9,59 +9,49 @@ import {
     CardHeader,
     CardTitle
 } from '@/components/ui/card';
-
 import { Button } from '@/components/ui/button';
 
 export function VehicleSliderPage() {
-    const [step, setStep] = React.useState(1); 
+    const [step, setStep] = React.useState(1);
     const [inputNumber, setInputNumber] = React.useState('');
     const [studentName, setStudentName] = React.useState<string | null>(null);
-    const [courses, setCourses] = React.useState<string[]>([]);  
+    const [courses, setCourses] = React.useState<{
+        courseId: string, 
+        courseName: string, 
+        professorId: string, 
+        professorName: string,
+        appointments: {
+            start_time: string;
+            end_time: string;
+            number_appointments: number;
+            number_appointments_reserve: number;
+            day_of_week: string;
+        }[]
+    }[]>([]);
     const [error, setError] = React.useState<string | null>(null);
-    const [selectedCourse, setSelectedCourse] = React.useState<string | null>(null); 
+    const [selectedCourse, setSelectedCourse] = React.useState<{ courseId: string, professorId: string } | null>(null);
     const [selectedPlace, setSelectedPlace] = React.useState<string | null>(null);
     const [selectedVehicle, setSelectedVehicle] = React.useState<string | null>(null);
+    const [appointments, setAppointments] = React.useState<{ date: string; timeRange: string }[]>([]);
+    const [noMoreAppointments, setNoMoreAppointments] = React.useState(false);
     const sliderRef = React.useRef<HTMLDivElement | null>(null);
     const [currentIndex, setCurrentIndex] = React.useState(0);
 
-    // Genera una lista de fechas y horas consecutivas con incrementos de 30 minutos
-    const generateDateTimes = () => {
-        const startDate = new Date('2024-09-07T07:30:00');
-        const endDate = new Date('2024-09-07T17:00:00');
-        const interval = 30; // Intervalo de 30 minutos
-        const dateTimes = [];
-
-        let currentDate = startDate;
-        while (currentDate < endDate) {
-            const nextDate = new Date(currentDate.getTime() + interval * 60000); // Añade 30 minutos
-            const date = currentDate.toLocaleDateString(); // Solo la fecha
-            const timeRange = `${currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${nextDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`; // Solo las horas
-            dateTimes.push({ date, timeRange });
-            currentDate = nextDate;
-        }
-
-        return dateTimes;
-    };
-
-    const dateTimes = generateDateTimes();
-
-    // Función para manejar la búsqueda basada en el número ingresado
+    
     const handleSearch = async () => {
         if (inputNumber) {
             try {
-                // Realizar una petición a la API para obtener los estudiantes
-                const response = await fetch('/api/students');
-                const students = await response.json();
-
-                // Buscar el estudiante por el id
-                const student = students.find((s: any) => s.id_student === inputNumber.trim());
-
-                if (student) {
-                    setStudentName(student.name); 
-                    setCourses(student.courses || []); // Asegurarse de que courses sea un array
-                    setStep(2);  // Avanzar al siguiente paso
+                const response = await fetch(`/api/student-courses?id_student=${inputNumber.trim()}`);
+                const data = await response.json();
+                if (response.ok) {
+                    setStudentName(data.studentName);
+                    setCourses(data.courses.map((course: any) => ({
+                        ...course,
+                        appointments: course.appointments || []
+                    })));
+                    setStep(2);
                 } else {
-                    setError('Estudiante no encontrado');
+                    setError(data.error || 'Error al buscar el estudiante');
                 }
             } catch (error) {
                 setError('Error al buscar el estudiante');
@@ -69,10 +59,31 @@ export function VehicleSliderPage() {
         }
     };
 
-    // Maneja la selección de un lugar
-    const handleSelectPlace = (place: string) => {
+    // Fetch available appointments when a course is selected
+    const handleSelectPlace = async (place: string) => {
         setSelectedPlace(place);
-        setStep(3);
+        if (selectedCourse) {
+            try {
+                const { courseId, professorId } = selectedCourse;
+                const response = await fetch(`/api/appointments?course_id=${encodeURIComponent(courseId)}&professor_id=${encodeURIComponent(professorId)}`);
+                const data = await response.json();
+    
+                if (response.ok) {
+                    setAppointments(data.map((appointment: any) => ({
+                        date: appointment.date, // Usa el campo 'date' que devolvió el backend
+                        timeRange: appointment.timeRange
+                    })));
+                    setStep(3); 
+                } else {
+                    setError(data.error || 'Error al buscar las citas');
+                }
+            } catch (error) {
+                console.error("Error fetching appointments:", error);
+                setError('Error al buscar las citas');
+            }
+        } else {
+            setError('Seleccione un curso antes de continuar.');
+        }
     };
 
     const handleSelectVehicle = (vehicle: string) => {
@@ -80,17 +91,24 @@ export function VehicleSliderPage() {
     };
 
     const handleNextSlide = () => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % dateTimes.length);
+        if (currentIndex < appointments.length - 1) {
+            setCurrentIndex((prevIndex) => prevIndex + 1);
+            setNoMoreAppointments(false);
+        } else {
+            setNoMoreAppointments(true);
+        }
     };
 
     const handlePrevSlide = () => {
-        setCurrentIndex((prevIndex) => (prevIndex - 1 + dateTimes.length) % dateTimes.length);
+        if (currentIndex > 0) {
+            setCurrentIndex((prevIndex) => prevIndex - 1);
+            setNoMoreAppointments(false);
+        }
     };
 
     return (
         <Card className="w-[600px] p-6 relative shadow-lg">
-            
-            {/* Paso 1: Ingresar número y buscar */}
+            {/* Step 1: Enter student ID and search */}
             {step === 1 && (
                 <div>
                     <CardHeader>
@@ -113,7 +131,7 @@ export function VehicleSliderPage() {
                 </div>
             )}
 
-            {/* Paso 2: Mostrar nombre del estudiante y cursos */}
+            {/* Step 2: Display student name and courses */}
             {step === 2 && studentName && (
                 <div>
                     <CardHeader>
@@ -123,112 +141,82 @@ export function VehicleSliderPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {courses && courses.length >= 0 ? (
-                            <div className="flex flex-col gap-4">
-                                <select
-                                    value={selectedCourse || ""}
-                                    onChange={(e) => setSelectedCourse(e.target.value)}
-                                    className="w-full p-2 border rounded-lg text-gray-800 dark:text-gray-200 dark:bg-gray-700"
-                                >
-                                    <option value="">Seleccione un curso</option>
-                                    {courses.map((course, index) => (
-                                        <option key={index} value={course}>
-                                            {course}
-                                        </option>
-                                    ))}
-                                </select>
-                                <Button
-                                    onClick={() => handleSelectPlace('Lugar de Prueba')}
-                                    className="w-full py-2 rounded-lg border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-300"
-                                    //disabled={!selectedCourse}
-                                >
-                                    Ir a Seleccionar Vehículo
-                                </Button>
+                        {courses.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {courses.map((course, index) => (
+                                    <Card
+                                        key={index}
+                                        className={`p-4 border ${selectedCourse?.courseId === course.courseId ? 'border-blue-500' : 'border-gray-300'} cursor-pointer`}
+                                        onClick={() => setSelectedCourse({ courseId: course.courseId, professorId: course.professorId })}
+                                    >
+                                        <CardHeader>
+                                            <CardTitle className="text-lg font-semibold">{course.courseId}: {course.courseName}</CardTitle>
+                                            <CardDescription className="text-sm">Profesor: {course.professorName}</CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                            {course.appointments.length > 0 ? (
+                                                <div>
+                                                    <p className="text-md font-semibold">Detalles:</p>
+                                                    <ul>
+                                                        {course.appointments.map((appointment, i) => (
+                                                            <li key={i} className="text-sm text-gray-500">
+                                                                <p><strong>Día de la semana:</strong> {appointment.day_of_week}</p>
+                                                                <p><strong>Hora:</strong> {appointment.start_time} - {appointment.end_time}</p>
+                                                                <p><strong>Cupos:</strong> {appointment.number_appointments} (Reservados: {appointment.number_appointments_reserve})</p>
+                                                                //NOTA: Aqui hay que terminar de agregar la info proveniente del AppointmentSchedule 
+                                                                //que pide en el inicio de la pag 2 del doc del proyecto
+                                                            </li>
+
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ) : (
+                                                <p className="text-gray-600 dark:text-gray-300">No hay citas disponibles.</p>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                ))}
                             </div>
                         ) : (
-                            <p className="text-red-500">El estudiante no tiene cursos asignados.</p>
+                            <p className="text-gray-600 dark:text-gray-300">No hay cursos disponibles.</p>
                         )}
                     </CardContent>
+                    <CardFooter className="flex justify-center mt-6">
+                        <Button onClick={() => handleSelectPlace('classroom')} className="px-4 py-2 rounded-lg">
+                            Continuar
+                        </Button>
+                    </CardFooter>
                 </div>
             )}
 
-            {/* Paso 3: Seleccionar cita */}
-            {step === 3 && (
-                <div>
-                    <CardHeader>
-                        <CardTitle className="text-2xl font-semibold text-gray-800 dark:text-white">Seleccione una Cita</CardTitle>
-                        <CardDescription className="text-md text-gray-500 mt-1 dark:text-gray-400">Deslice y seleccione una cita que se ajuste a sus preferencias</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="relative mt-6">
-                            <div
-                                ref={sliderRef}
-                                className="flex overflow-hidden justify-center items-center"
-                                style={{
-                                    width: '100%',
-                                    height: '160px',
-                                    scrollBehavior: "smooth",
-                                }}
-                            >
-                                <Button
-                                    key={dateTimes[currentIndex].date + dateTimes[currentIndex].timeRange}
-                                    onClick={() => handleSelectVehicle(dateTimes[currentIndex].date + ' ' + dateTimes[currentIndex].timeRange)}
-                                    variant={selectedVehicle === dateTimes[currentIndex].date + ' ' + dateTimes[currentIndex].timeRange ? 'default' : 'outline'}
-                                    className={`w-[200px] h-[100px] text-base rounded-lg flex flex-col items-center justify-center border ${selectedVehicle === dateTimes[currentIndex].date + ' ' + dateTimes[currentIndex].timeRange ? 'text-white' : 'text-gray-700 dark:text-gray-300 dark:border-gray-500'} transition-all duration-200 hover:shadow-lg`}
-                                >
-                                    <span>{dateTimes[currentIndex].date}</span>
-                                    <span>{dateTimes[currentIndex].timeRange}</span>
-                                </Button>
-                            </div>
+    {step === 3 && (
+        <div>
+            <CardHeader>
+                <CardTitle className="text-2xl font-semibold text-gray-800 dark:text-white">Citas disponibles</CardTitle>
+            </CardHeader>
+            <CardContent>
+                {appointments.length > 0 ? (
+                    <div className="flex justify-between items-center mb-4">
+                        <Button onClick={handlePrevSlide} disabled={currentIndex === 0}>Anterior</Button>
+                        <div className="text-center">
+                            <p className="text-lg text-gray-800 dark:text-white">{appointments[currentIndex].date}</p>
+                            <p className="text-md text-gray-500 dark:text-gray-300">{appointments[currentIndex].timeRange}</p>
                         </div>
-                        <div className="mt-6 text-center">
-                            {selectedVehicle && (
-                                <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-                                    Has seleccionado: {selectedVehicle}
-                                </h2>
-                            )}
-                        </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-center mt-6">
-                        <p className="text-md text-gray-600 dark:text-gray-400">Desliza entre las opciones y selecciona tu cita favorita</p>
-                    </CardFooter>
+                        <Button onClick={handleNextSlide} disabled={noMoreAppointments}>Siguiente</Button>
+                    </div>
+                ) : (
+                    <p className="text-gray-600 dark:text-gray-300">No hay citas disponibles en este momento.</p>
+                )}
+            </CardContent>
+        </div>
+    )}
 
-                    {/* Botones de navegación */}
-                    <div className="absolute inset-y-0 left-0 flex items-center">
-                        <Button
-                            onClick={handlePrevSlide}
-                            className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-8 w-8"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={3}
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </Button>
-                    </div>
-                    <div className="absolute inset-y-0 right-0 flex items-center">
-                        <Button
-                            onClick={handleNextSlide}
-                            className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-8 w-8"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={3}
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </Button>
-                    </div>
-                </div>
+
+            {/* Handle errors */}
+            {error && (
+                <CardContent>
+                    <p className="text-red-500 mt-2">{error}</p>
+                </CardContent>
             )}
         </Card>
     );
