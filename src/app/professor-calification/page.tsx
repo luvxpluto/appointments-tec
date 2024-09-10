@@ -96,7 +96,7 @@ export function StudentForm() {
 
   const renderStars = () => {
     const stars = [];
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 3; i++) {  // Cambiado a 3 estrellas
       stars.push(
         <span key={i} className={`text-4xl ${rating >= i ? "text-yellow-500" : "text-gray-300"}`}>
           &#9733;
@@ -279,20 +279,23 @@ export function StudentForm() {
               <Slider
                 defaultValue={[1]}
                 min={1}
-                max={5}
-                step={1} // Cambiado a enteros
-                onValueChange={(value) => setRating(value[0])}
-                className="w-full"
+                max={3} // Cambiado el máximo a 3
+                step={1} // Permitir calificaciones de medios puntos
+                value={[rating]}
+                onValueChange={handleSliderChange}
               />
+
+              {/* Mensaje de error para el Slider */}
+              <FormMessage />
             </div>
-            <CardFooter className="flex justify-center mt-4">
-              <Button type="submit">Registrar</Button>
-            </CardFooter>
+            <Button type="submit" className="mt-4 w-full">
+              Enviar calificación
+            </Button>
           </form>
         </Form>
       </CardContent>
     </Card>
   );
 }
-
 export default StudentForm;
+
