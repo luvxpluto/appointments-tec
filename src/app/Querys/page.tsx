@@ -15,11 +15,10 @@ import {
     CardHeader,
     CardTitle
 } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'; // Import Table components
 import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
 import { toast } from '@/components/ui/use-toast';
-import classNames from 'classnames';
-
 
 
 const querySchema = z.object({
@@ -30,7 +29,7 @@ const querySchema = z.object({
 function cn(...classes: string[]) {
     return classes.filter(Boolean).join(' ');
   }
-
+  
 export function ProfessorAppointments() {
   const form = useForm<z.infer<typeof querySchema>>({
     resolver: zodResolver(querySchema),
@@ -42,7 +41,7 @@ export function ProfessorAppointments() {
 
   const [professors, setProfessors] = React.useState([]);
   const [courses, setCourses] = React.useState([]);
-  const [appointments, setAppointments] = React.useState(null);
+  const [appointments, setAppointments] = React.useState([]);
   const [openProfessor, setOpenProfessor] = React.useState(false);
   const [openCourse, setOpenCourse] = React.useState(false);
 
@@ -54,8 +53,7 @@ export function ProfessorAppointments() {
 
   const onSubmit = async (data: any) => {
     try {
-      // Asegúrate de que la ruta corresponde a la ruta en tu backend.
-      const response = await fetch(`/api/querys/professor-appointments`, { 
+      const response = await fetch(`/api/querys/professor-appointments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,10 +63,10 @@ export function ProfessorAppointments() {
           id_course: data.id_course,
         }),
       });
-  
+
       if (response.ok) {
         const appointmentData = await response.json();
-        setAppointments(appointmentData);
+        setAppointments(appointmentData);  // Actualiza el estado con los resultados de la consulta
       } else {
         const errorData = await response.json();
         toast({
@@ -84,10 +82,9 @@ export function ProfessorAppointments() {
       console.error("Error al obtener los datos:", error);
     }
   };
-  
 
   return (
-    <Card className="w-[400px]">
+    <Card className="w-[600px]">
       <CardHeader>
         <CardTitle>Consultar citas</CardTitle>
         <CardDescription>Selecciona un profesor y un curso para consultar sus citas.</CardDescription>
@@ -221,16 +218,26 @@ export function ProfessorAppointments() {
         </Form>
       </CardContent>
 
-      {appointments && (
+      {/* Mostrar los resultados en una tabla si hay citas */}
+      {appointments.length > 0 && (
         <CardContent>
-          <h3 className="text-lg font-semibold">Resultados de consultas:</h3>
-          <ul>
-            {appointments.map((appointment) => (
-              <li key={appointment.id_appointment}>
-                Fecha: {new Date(appointment.date_time).toLocaleString()} - Reservado: {appointment.is_reserved ? 'Sí' : 'No'}
-              </li>
-            ))}
-          </ul>
+          <h3 className="text-lg font-semibold mb-4">Resultados de consultas:</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Fecha</TableHead>
+                <TableHead>Reservado</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {appointments.map((appointment) => (
+                <TableRow key={appointment.id_appointment}>
+                  <TableCell>{new Date(appointment.date_time).toLocaleString()}</TableCell>
+                  <TableCell>{appointment.is_reserved ? 'Sí' : 'No'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       )}
     </Card>
