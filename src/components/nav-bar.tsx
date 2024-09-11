@@ -56,8 +56,14 @@ const componentsProfessor: { title: string; href: string; description: string }[
         "Formulario para registrar la hora de consulta de un profesor.",
     },
     {
-      title: "Realizar Consultas",
+      title: "Reporte de profesor",
       href: "/Querys",
+      description:
+        "Formulario para realizar consultas de citas",
+    },
+    {
+      title: "Reporte de alumno",
+      href: "/QuerysAlumno",
       description:
         "Formulario para realizar consultas de citas",
     }
