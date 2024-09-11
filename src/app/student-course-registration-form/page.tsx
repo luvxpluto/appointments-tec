@@ -47,6 +47,12 @@ const schema = z.object({
     .min(1, { message: "El carnet del estudiante es obligatorio" })
     .trim(),
   id_professor_course: z.string().min(1, { message: "Debe seleccionar un curso" }),
+  enrollment_count: z
+    .string()
+    .min(1, { message: "El número de veces debe ser mayor o igual a cero" })
+    .refine((value) => !isNaN(parseInt(value, 10)) && parseInt(value, 10) >= 0, {
+      message: "El valor debe ser un número mayor o igual a 0",
+    }),
 });
 
 // Inferir el tipo del esquema
@@ -83,13 +89,19 @@ export function RegisterStudentCourseForm() {
   }, []);
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
+    // Convertir `enrollment_count` a número antes de enviarlo al backend
+    const formDataWithNumber = {
+      ...data,
+      enrollment_count: parseInt(data.enrollment_count, 10), // Convertir el valor a número
+    };
+
     try {
       const response = await fetch("/api/student-course", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formDataWithNumber),
       });
 
       if (response.ok) {
@@ -215,6 +227,28 @@ export function RegisterStudentCourseForm() {
                         </Command>
                       </PopoverContent>
                     </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="enrollment_count"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="enrollment_count">
+                      Veces que ha llevado el curso
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        id="enrollment_count"
+                        type="number"
+                        placeholder="Ingrese el número de veces"
+                        {...field}
+                        className="max-w-full"
+                        min={0} // Asegura que el número sea mayor o igual a 0
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
