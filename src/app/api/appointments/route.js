@@ -1,36 +1,65 @@
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-
-function convertDataTimeToISO(date_time) {
-    try {
-        // Convertir la fecha en formato GMT a un objeto Date
-        const gmtDate = new Date(date_time);
-        // Obtener el desfase horario local en minutos
-        const localTimeZoneOffset = new Date().getTimezoneOffset();
-        // Ajustar la fecha GMT al desfase horario local
-        gmtDate.setMinutes(gmtDate.getMinutes() - localTimeZoneOffset);
-        // Convertir la fecha ajustada a una cadena en formato ISO
-        return gmtDate.toISOString();
-    } catch (error) {
-        console.error("Error al convertir date_time:", error.message);
-        return null;
-    }
-}
+import { NextResponse } from 'next/server';
+import getAppointmentsListByPriority from '@/utils/appointmentUtils';
+import prisma from '@/lib/prisma'; // Asegúrate de tener este archivo para la instancia de PrismaClient
 
 export async function GET(request) {
-    try {
-        const schedules = await prisma.appointment.findMany();
-        const convertedSchedules = schedules.map(schedule => {
-            let convertedDateTime = convertDataTimeToISO(schedule.date_time);
-            return {
-                ...schedule,
-                date_time: convertedDateTime,
+  const { searchParams } = new URL(request.url);
+  const id_student = searchParams.get('id_student');
+  const professorCourseId = searchParams.get('professorCourseId');
 
-            };
+  if (!id_student || !professorCourseId) {
+    return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
+  }
+
+  try {
+    const student = await prisma.student.findUnique({
+      where: { id_student: id_student },
+    });
+
+    if (!student) {
+      return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+    }
+
+    const appointmentsList = await getAppointmentsListByPriority(student, parseInt(professorCourseId));
+    return NextResponse.json(appointmentsList);
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
+//Actualizar user y is available
+export async function PUT(request){
+    try {
+        const body = await request.json();
+        const { id_student, id_appointment } = body;
+        const student = await prisma.student.findUnique({
+        where: { id_student: id_student },
         });
-        return NextResponse.json(convertedSchedules, { status: 200 });
+    
+        if (!student) {
+        return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+        }
+    
+        const appointment = await prisma.appointment.findUnique({
+        where: { id_appointment: id_appointment },
+        });
+    
+        if (!appointment) {
+        return NextResponse.json({ error: 'Appointment not found' }, { status: 404 });
+        }
+    
+        const updatedAppointment = await prisma.appointment.update({
+        where: { id_appointment: id_appointment },
+        data: {
+            id_student: id_student,
+            is_available: false,
+        },
+        });
+    
+        return NextResponse.json(updatedAppointment);
     } catch (error) {
-        console.error("Error al obtener las citas:", error.message, error.stack);
-        return NextResponse.json({ error: "Error al obtener las citas" }, { status: 500 });
+        console.error('Error updating appointment:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

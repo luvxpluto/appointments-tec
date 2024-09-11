@@ -3,8 +3,8 @@ import prisma from '@/lib/prisma';
 
 // Función para validar los campos requeridos del cuerpo de la solicitud
 function validateStudentCourse(body) {
-  if (!body || !body.id_student || !body.id_professor_course) {
-    return { valid: false, error: "Student ID and ProfessorCourse ID are required" };
+  if (!body || !body.id_student || !body.id_professor_course || !body.enrollment_count) {
+    return { valid: false, error: "Student ID, ProfessorCourse ID y enrollment_count son requeridos" };
   }
   return { valid: true };
 }
@@ -53,8 +53,8 @@ export async function POST(request) {
       data: {
         id_student: body.id_student,
         id_professor_course: idProfessorCourse,
-        enrollment_count: 1,  // Inicializa con 1
-        stars_rating: 0,      // Inicializa con 0
+        enrollment_count: body.enrollment_count,  // Asigna el número de veces que ha llevado el curso
+        stars_rating: 0,  // Inicializa con 0
       },
     });
 
@@ -63,29 +63,6 @@ export async function POST(request) {
     console.error('Error registering the student in the course:', error);
     return NextResponse.json(
       { error: 'Error registering the student in the course' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function GET(request) {
-  try {
-    const studentCourses = await prisma.studentCourse.findMany({
-      include: {
-        student: true,
-        professorCourse: {
-          include: {
-            course: true,
-            professor: true,
-          },
-        },
-      },
-    });
-    return NextResponse.json(studentCourses, { status: 200 });
-  } catch (error) {
-    console.error('Error getting the student-course relationships:', error);
-    return NextResponse.json(
-      { error: 'Error getting the student-course relationships' },
       { status: 500 }
     );
   }
