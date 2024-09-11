@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
@@ -23,6 +24,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 
 import {
@@ -111,6 +113,7 @@ export function AppointmentCourseForm(){
     const [openCourse, setOpenCourse] = React.useState(false);
     const [professorCourses, setProfessorCourses] = React.useState<ProfessorCourse[]>([]);
     const [loading, setLoading] = React.useState(false);
+    const router = useRouter();
     
     React.useEffect(() => {
         fetchStudents().then(setStudents);
@@ -129,8 +132,13 @@ export function AppointmentCourseForm(){
         resolver: zodResolver(appointmentCourseSchema),
     });
 
-    const onSubmit = async (data: any) => {
-        
+    const onSubmit = (data: z.infer<typeof appointmentCourseSchema>) => {
+        const { id_student, professorCourseId} = data;
+        if (id_student && professorCourseId) {
+            router.push(`/appointments/${id_student}_${professorCourseId}`);
+        } else {
+            alert('Selecciona un estudiante y un curso antes de continuar.');
+        }
     };
 
     return (
@@ -206,62 +214,64 @@ export function AppointmentCourseForm(){
                             {/* Combobox de cursos del profesor */}
                             {professorCourses.length > 0 && (
                                 <FormField
-                                    control={form.control}
-                                    name="professorCourseId"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col">
-                                            <FormLabel>Curso del Profesor</FormLabel>
-                                            <Popover open={openCourse} onOpenChange={setOpenCourse}>
-                                                <PopoverTrigger asChild>
-                                                    <FormControl>
-                                                        <Button
-                                                            variant="outline"
-                                                            role="combobox"
-                                                            aria-expanded={openCourse}
-                                                            className="w-full justify-between"
-                                                        >
-                                                            {field.value
-                                                                ? professorCourses.find(
-                                                                      (course) => course.professorCourseId === field.value
-                                                                  )?.courseName
-                                                                : 'Selecciona un curso...'}
-                                                            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                        </Button>
-                                                    </FormControl>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-full p-0">
-                                                    <Command>
-                                                        <CommandInput placeholder="Buscar curso..." />
-                                                        <CommandList>
-                                                            <CommandEmpty>No se encontraron cursos.</CommandEmpty>
-                                                            <CommandGroup>
-                                                                {professorCourses.map((course) => (
-                                                                    <CommandItem
-                                                                        key={course.professorCourseId}
-                                                                        onSelect={() => {
-                                                                            field.onChange(course.professorCourseId);
-                                                                            setOpenCourse(false);
-                                                                        }}
-                                                                    >
-                                                                        {course.courseName}
-                                                                        <CheckIcon
-                                                                            className={cn(
-                                                                                "ml-auto h-4 w-4",
-                                                                                course.professorCourseId === field.value
-                                                                                    ? "opacity-100"
-                                                                                    : "opacity-0"
-                                                                            )}
-                                                                        />
-                                                                    </CommandItem>
-                                                                ))}
-                                                            </CommandGroup>
-                                                        </CommandList>
-                                                    </Command>
-                                                </PopoverContent>
-                                            </Popover>
-                                        </FormItem>
-                                    )}
-                                />
+                                control={form.control}
+                                name="professorCourseId"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                        <FormLabel>Curso del Profesor</FormLabel>
+                                        <Popover open={openCourse} onOpenChange={setOpenCourse}>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button
+                                                        variant="outline"
+                                                        role="combobox"
+                                                        aria-expanded={openCourse}
+                                                        className="w-full justify-between"
+                                                        disabled={!selectedStudent}
+                                                    >
+                                                        {field.value
+                                                            ? professorCourses.find(
+                                                                  (course) => course.professorCourseId === field.value
+                                                              )?.courseName
+                                                            : 'Selecciona un curso...'}
+                                                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-full p-0">
+                                                <Command>
+                                                    <CommandInput placeholder="Buscar curso..." />
+                                                    <CommandList>
+                                                        <CommandEmpty>No se encontraron cursos.</CommandEmpty>
+                                                        <CommandGroup>
+                                                            {professorCourses.map((course) => (
+                                                                <CommandItem
+                                                                    key={course.professorCourseId}
+                                                                    onSelect={() => {
+                                                                        field.onChange(course.professorCourseId.toString());
+                                                                        setOpenCourse(false);
+                                                                    }}
+                                                                >
+                                                                    {course.courseName}
+                                                                    <CheckIcon
+                                                                        className={cn(
+                                                                            "ml-auto h-4 w-4",
+                                                                            course.professorCourseId.toString() === field.value
+                                                                                ? "opacity-100"
+                                                                                : "opacity-0"
+                                                                        )}
+                                                                    />
+                                                                </CommandItem>
+                                                            ))}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             )}
                             
                             <Button type="submit">Solicitar</Button>
@@ -273,7 +283,7 @@ export function AppointmentCourseForm(){
                                         <p>Cargando...</p>
                                     ) : (
                                         <Table>
-                                            <TableCaption>Información de cursos del profesor</TableCaption>
+                                            <TableCaption>Información de cursos matriculados</TableCaption>
                                             <TableHeader>
                                                 <TableRow>
                                                     <TableHead>Nombre del curso</TableHead>

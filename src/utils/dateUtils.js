@@ -40,7 +40,7 @@ function getNextWeek() {
     };
 }
   
-export default {
+export {
     getCurrentWeek,
     getNextWeek
 };

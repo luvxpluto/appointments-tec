@@ -1,28 +1,23 @@
 import prisma from "@/lib/prisma";
 import { getCurrentWeek, getNextWeek } from "@/utils/dateUtils";
-import { start } from "repl";
 
+function formattedData(appointments) {
+    const formattedAppointments = appointments.map((appointment) => {
+        const formatted = {
+            id_appointment: appointment.id_appointment,
+            date_time: appointment.date_time,
+            is_available: appointment.is_available,
+            is_reserved: appointment.is_reserved,
+            duration: appointment.schedule.duration_appointment, 
+            course_name: appointment.schedule.professorCourse.course.name,
+            professor_name: appointment.schedule.professorCourse.professor.name,
+        };
 
-// Get appointments list by priority
-// Lista de citas por prioridad
+        return formatted;
+    });
+    return formattedAppointments;
+}
 
-/* Student, ProfessorCourse
-* Sudent.timesEnrolled
-* Student.stars
-*/
-
-/*
-* CAP SEMANA SIGUIENTE
-* 1. CITAS NO RESERVADAS -> PROFESOR DEL CURSO
-* 2. CITAS NO RESERVADAS SEMANA ACTUAL -> PROFESOR DEL CURSO
-* 3. CITAS RESERVADAS SEMANA ACTUAL -> PROFESOR DEL CURSO 
-* 4. CITAS NO RESERVADAS PROXIAMA SEMANA -> PROFESOR DEL CURSO
-* 5. CITAS DISPONIBLES (RESERVADAS O NO) -> PROFESOR DEL CURSO 
-* 6. CITAS NO RESERVADAS SEMANA ACTUAL -> PROFESOR DE LA MATERIA
-*/
-
-// 1. CITAS NO RESERVADAS -> PROFESOR DEL CURSO -> SEMANA ACTUAL Y SIGUIENTE
-// 0 -> 1, 1->1, 2->1
 async function getAppointmentsNotReservedByProfessorCourse(professorCourseId) {
     const currentWeek = getCurrentWeek();
     const nextWeek = getNextWeek();
@@ -35,13 +30,25 @@ async function getAppointmentsNotReservedByProfessorCourse(professorCourseId) {
                 },
                 is_available: true,
                 is_reserved: false,
-                start: {
+                date_time: {
                     gte: currentWeek.start,
                     lte: nextWeek.end
                 }
+            },
+            include: {
+                schedule: {
+                    include: {
+                        professorCourse: {
+                            include: {
+                                course: true,
+                                professor: true
+                            }
+                        }
+                    }
+                }
             }
       });
-      return appointments;
+      return formattedData(appointments);
 
     } catch (error) {
       console.error("Error fetching available appointments:", error);
@@ -49,8 +56,7 @@ async function getAppointmentsNotReservedByProfessorCourse(professorCourseId) {
     }
 }
 
-// 2. CITAS NO RESERVADAS SEMANA ACTUAL -> PROFESOR DEL CURSO
-// 0 -> 2, 0 -> 3, 
+
 async function getAppointmentsNotReservedCurrentWeekByProfessorCourse(professorCourseId) {
     const currentWeek = getCurrentWeek();
 
@@ -62,13 +68,25 @@ async function getAppointmentsNotReservedCurrentWeekByProfessorCourse(professorC
                 },
                 is_available: true,
                 is_reserved: false,
-                start: {
+                date_time: {
                     gte: currentWeek.start,
                     lte: currentWeek.end
                 }
+            },
+            include: {
+                schedule: {
+                    include: {
+                        professorCourse: {
+                            include: {
+                                course: true,
+                                professor: true
+                            }
+                        }
+                    }
+                }
             }
         });
-        return appointments;
+        return formattedData(appointments);
 
     } catch (error) {
         console.error("Error fetching available appointments:", error);
@@ -88,13 +106,62 @@ async function getAppointmentsReservedCurrentWeekByProfessorCourse(professorCour
                 },
                 is_available: true,
                 is_reserved: true,
-                start: {
+                date_time: {
                     gte: currentWeek.start,
                     lte: currentWeek.end
                 }
+            },
+            include: {
+                schedule: {
+                    include: {
+                        professorCourse: {
+                            include: {
+                                course: true,
+                                professor: true
+                            }
+                        }
+                    }
+                }
             }
         });
-        return appointments;
+        return formattedData(appointments);
+
+    } catch (error) {
+        console.error("Error fetching available appointments:", error);
+        throw error;
+    }
+}
+
+async function getAppointmentsReservedNextWeekByProfessorCourse(professorCourseId) {
+    const nextWeek = getNextWeek();
+
+    try {
+        const appointments = await prisma.appointment.findMany({
+            where: {
+                schedule: {
+                    id_professor_course: professorCourseId
+                },
+                is_available: true,
+                is_reserved: true,
+                date_time: {
+                    gte: nextWeek.start,
+                    lte: nextWeek.end
+                }
+            },
+            include: {
+                schedule: {
+                    include: {
+                        professorCourse: {
+                            include: {
+                                course: true,
+                                professor: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        return formattedData(appointments);
 
     } catch (error) {
         console.error("Error fetching available appointments:", error);
@@ -115,13 +182,25 @@ async function getAppointmentsNotReservedNextWeekByProfessorCourse(professorCour
                 },
                 is_available: true,
                 is_reserved: false,
-                start: {
+                date_time: {
                     gte: nextWeek.start,
                     lte: nextWeek.end
                 }
+            },
+            include: {
+                schedule: {
+                    include: {
+                        professorCourse: {
+                            include: {
+                                course: true,
+                                professor: true
+                            }
+                        }
+                    }
+                }
             }
         });
-        return appointments;
+        return formattedData(appointments);
 
     } catch (error) {
         console.error("Error fetching available appointments:", error);
@@ -129,8 +208,6 @@ async function getAppointmentsNotReservedNextWeekByProfessorCourse(professorCour
     }
 }
 
-// 5. CITAS DISPONIBLES (RESERVADAS O NO) -> PROFESOR DEL CURSO
-// 0 -> 3
 async function getAppointmentsAvailableByProfessorCourse(professorCourseId) {
     const currentWeek = getCurrentWeek();
     const nextWeek = getNextWeek();
@@ -142,13 +219,25 @@ async function getAppointmentsAvailableByProfessorCourse(professorCourseId) {
                     id_professor_course: professorCourseId
                 },
                 is_available: true,
-                start: {
+                date_time: {
                     gte: currentWeek.start,
                     lte: nextWeek.end
                 }
+            },
+            include: {
+                schedule: {
+                    include: {
+                        professorCourse: {
+                            include: {
+                                course: true,
+                                professor: true
+                            }
+                        }
+                    }
+                }
             }
         });
-        return appointments;
+        return formattedData(appointments);
 
     } catch (error) {
         console.error("Error fetching available appointments:", error);
@@ -156,10 +245,11 @@ async function getAppointmentsAvailableByProfessorCourse(professorCourseId) {
     }
 }
 
-export default {
+export {
     getAppointmentsNotReservedByProfessorCourse,
     getAppointmentsNotReservedCurrentWeekByProfessorCourse,
     getAppointmentsReservedCurrentWeekByProfessorCourse,
     getAppointmentsNotReservedNextWeekByProfessorCourse,
-    getAppointmentsAvailableByProfessorCourse
+    getAppointmentsAvailableByProfessorCourse,
+    getAppointmentsReservedNextWeekByProfessorCourse
 };
