@@ -71,6 +71,12 @@ const componentsProfessor: { title: string; href: string; description: string }[
 
 const componentsCourses: { title: string; href: string; description: string }[] = [
     {
+      title: "Registrar semestre",
+      href: "/semester",
+      description:
+        "Formulario para registrar el semestre.",
+    },
+    {
       title: "Registrar curso",
       href: "/course-form",
       description:
