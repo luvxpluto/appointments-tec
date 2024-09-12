@@ -19,8 +19,6 @@ function validateStudentQuery(body) {
 
 // Función para obtener las citas (appointments) para un profesor y un curso específico
 async function getProfessorAppointments(body) {
-    console.log("Obteniendo citas para profesor y curso:", body); // Log para depurar
-
     const appointments = await prisma.appointment.findMany({
         where: {
             schedule: {
@@ -58,8 +56,6 @@ async function getProfessorAppointments(body) {
         },
     });
 
-    console.log("Citas encontradas:", appointments); // Log para depurar
-
     return appointments.map((appointment) => ({
         id: appointment.id_appointment,
         date: appointment.date_time,
@@ -72,7 +68,6 @@ async function getProfessorAppointments(body) {
 
 // Función para obtener las citas (appointments) para un estudiante específico
 async function getStudentAppointments(body) {
-    console.log("Obteniendo citas para el estudiante:", body); // Log para depurar
 
     const appointments = await prisma.appointment.findMany({
         where: {
@@ -100,8 +95,6 @@ async function getStudentAppointments(body) {
         },
     });
 
-    console.log("Citas encontradas para el estudiante:", appointments); // Log para depurar
-
     if (appointments.length === 0) {
         console.log(`No se encontraron citas para el id del estudiante: ${body.id_student}`);
     }
@@ -119,7 +112,6 @@ async function getStudentAppointments(body) {
 export async function POST(request) {
     try {
         const body = await request.json();
-        console.log("Solicitud recibida con body:", body); // Log para depurar
 
         // Verificar si es una consulta de citas por profesor y curso
         if (body.id_course && body.id_professor) {
@@ -131,7 +123,6 @@ export async function POST(request) {
 
             const appointments = await getProfessorAppointments(body);
             if (appointments.length === 0) {
-                console.log("No se encontraron citas para el curso y profesor especificados."); // Log para depurar
                 return NextResponse.json({ error: "No se encontraron citas para el curso y profesor especificados" }, { status: 404 });
             }
 
@@ -143,17 +134,14 @@ export async function POST(request) {
         if (body.id_student) {
             const validation = validateStudentQuery(body);
             if (!validation.valid) {
-                console.log("Validación fallida para estudiante:", validation.error); // Log para depurar
                 return NextResponse.json({ error: validation.error }, { status: 400 });
             }
 
             const appointments = await getStudentAppointments(body);
             if (appointments.length === 0) {
-                console.log("No se encontraron citas para el estudiante especificado."); // Log para depurar
                 return NextResponse.json({ error: "No se encontraron citas para el estudiante especificado" }, { status: 404 });
             }
 
-            console.log("Citas enviadas para el estudiante:", appointments); // Log para depurar
             return NextResponse.json(appointments, { status: 200 });
         }
 
@@ -207,7 +195,6 @@ export async function GET() {
             is_reserved: appointment.is_reserved,
         }));
 
-        console.log("Enviando citas:", formattedAppointments); // Log para depurar
         return NextResponse.json(formattedAppointments, { status: 200 });
     } catch (error) {
         console.error("Error obteniendo las citas:", error); // Log de error

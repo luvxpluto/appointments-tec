@@ -40,7 +40,7 @@ export function StudentAppointments() {
   });
 
   // Estados para manejar los estudiantes y citas
-  const [students, setStudents] = React.useState([]);
+  const [students, setStudents] = React.useState<{ id_student: string; name: string }[]>([]);
   const [appointments, setAppointments] = React.useState([]);
   const [openStudent, setOpenStudent] = React.useState(false);
 
@@ -109,7 +109,7 @@ export function StudentAppointments() {
                               aria-expanded={openStudent}
                               className={cn(
                                 "w-[350px] justify-between",
-                                !field.value && "text-muted-foreground"
+                                !field.value ? "text-muted-foreground" : ""
                               )}
                             >
                               {field.value

@@ -42,9 +42,9 @@ export function ProfessorAppointments() {
   });
 
   // Estados para manejar los profesores, cursos y citas
-  const [professors, setProfessors] = React.useState([]);
-  const [courses, setCourses] = React.useState([]);
-  const [appointments, setAppointments] = React.useState([]);
+  const [professors, setProfessors] = React.useState<{ id_professor: string; name: string }[]>([]);
+  const [courses, setCourses] = React.useState<{ id_course: string; name: string }[]>([]);
+  const [appointments, setAppointments] = React.useState<{ id: string; date: string; is_reserved: boolean }[]>([]);
   const [openProfessor, setOpenProfessor] = React.useState(false);
   const [openCourse, setOpenCourse] = React.useState(false);
 
@@ -115,7 +115,7 @@ export function ProfessorAppointments() {
                               aria-expanded={openProfessor}
                               className={cn(
                                 "w-[350px] justify-between",
-                                !field.value && "text-muted-foreground"
+                                !field.value ? "text-muted-foreground" : ""
                               )}
                             >
                               {field.value
@@ -174,7 +174,7 @@ export function ProfessorAppointments() {
                               aria-expanded={openCourse}
                               className={cn(
                                 "w-[350px] justify-between",
-                                !field.value && "text-muted-foreground"
+                                !field.value ? "text-muted-foreground" : ""
                               )}
                             >
                               {field.value
